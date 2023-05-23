@@ -13,7 +13,7 @@ $newspaper_citation_pattern $magazine_citation_pattern $website_citation_pattern
 
 # -- Name
 our $name_pattern = qr/(?<family>\pL[\pL'\p{Pd}\s]*),\s+(?<first>(\p{Lu}\.\s?)+|(\p{Lu}[\pL'\p{Pd}]*))/;
-#test_mla_name_pattern();
+#test_name_pattern();
 
 # -- Author
 my $author_pattern = qr/(?<primary>$name_pattern)(,\sand\s(?<secondary>$name_pattern)|(?<others>\set\sal))?/;
