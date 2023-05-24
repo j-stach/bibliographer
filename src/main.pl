@@ -9,11 +9,84 @@ if ($msg =~ $MLA::name_pattern) {
 	print "$msg";
 }
 
-# Open the program,
+# Installer:
+# Installs/updates perl to v5.36 and runs cpan on any needed modules
+# Checks for the existence of bibliographer directory, if missing, creates a new one for saving raw files
+# Modifies the bash file to add a script shortcut named "bibliographer"
 
-# Take in a formatted bibliography, pattern match it, & export it as raw citation info to an organized text file (bibliograpy_name.raw.txt)
-# If one of the authors is "and others", then use some API to retrieve the authors, excluding the author that is saved
+# CLI Program:
+# $> bibliographer --new (-N) <bibliography_name>
+# (Creates a new raw file then enters editor mode)
+#
+# $> bibliographer --convert (-C) <bibliography_file.rtf> (--<CITATION_STYLE> <new_filename.rtf>)
+# (Converts the rtf file into .raw.txt)
+# (If one of the authors' names returns as "et al.", then use an external API to attempt to retrieve the other authors)
+# (Then if there is a citation style argument it converts the raw into the new style)
+# (If there is a new file name it saves as that filename, otherwise it overwrites the existing file with the newly formatted rtf)
+# 
+# $> bibliographer --edit (-E) <bibliography_name>
+# (Loads the bibliography_name.raw.txt file and enters Editor Mode)
+#
+# $> bibliographer --export (-X(o)) <bibliography_name> --<CITATION_STYLE> (<new_filename.rtf>)
+# (Exports the raw file with the specified name as the specified citation style to bibliography_name.rtf)
+# (If -Xo is selected, opens the export option editor to allow the citation style rules to be modified)
+# (If a new filename is specified, it will export the bibliography to that name, if a file of that name does not already exist in that directory)
+# (If the filename exists, it will add a digit _0 to the end of the filename and try again, adding 1 until it succeeds, then print the path to that file to output)
 
-# Alternatively, submit raw citation info one at a time and pass them into the correct order into a new or existing raw file
+# Universals:
+# (Applicable at every level of loop within Editor Mode)
+# $ > --cancel (-Z) 
+# (Cancels the current operation and exits to the outer loop)
+# $ > --done (-D) 
+# (Ends the current operation and moves to the next stage of the loop, saving the changes)
+# $ > --help (-H)
+# (Lists the operations available at the current level, with a brief synopsis of instructions for the current stage)
 
-# Select a citation style, copy the raw file, rewrite the raw copy in the chosen style, then save it as a formatted bibliography (rich text or html)
+# Editor Mode:
+# bibliography > --show (-S) (<CITATION_#>)
+# (Prints the full list of citations in order, with an ordering number in front of the citation)
+# (If citation number is provided, shows the full citation indicated by that number)
+# bibliography > --add (-A) <MEDIUM> (<CITATION_#>)
+# (Starts the Citation Adder for the selected citation medium)
+# (If a citation number is provided, it adds the citation at that position and moves the following ones down, instead of adding it to the end of the list)
+# bibliography > --edit (-E) <CITATION_#>
+# (Opens the Citation Editor for the citation indicated by the citation number)
+# bibliography > --move (-M(s)) <First Citation #> (--swap) <Second Citation #>
+# (Either swaps citations, or moves the first citation to the position indicated by the second and pushes others down)
+# bibliography > --remove (-R(a, p)) <CITATION_#>
+# (Deletes the citation indicated by the ordering number and moves the following ones up, -Ra removes all, -Rp opens the Citation Adder to replace the citation)
+
+# Citation Adder:
+# Opens Author Adder,
+# Opens Title Adder,
+# And so on, for each field applicable to the chosen medium
+
+# Citation Editor:
+# Citation (#) > --show (-S) 
+# (Shows the full raw citation that is currently selected)
+# 
+# Citation (#) > --author <Author Name> --remove (-R(a))
+# (Removes 'Author Name' from the citation, if present. -Ra removes all authors from the citation if author name is not specified)
+# Citation (#) > --author <Author Name> --edit (-E) <New Name>
+# (Replaces the indicated author with a new name, without changing ordering)
+# Citation (#) > --author --add (-A)
+# (Opens Author Adder for adding multiple authors sequentially)
+# Citation (#) > --author --move (-M(s, b, a)) (<First Author> (--swap, --before, --after) <Second Author>)
+# (If author names are provided, either swaps authors, or moves to before or after the second author)
+# 
+# Citation (#) > --title --edit (-E) <The New Title>
+# (And so on for each field of the citation)
+# (For convenience, prints out the fields to be changed before prompting for replacements)
+
+# Author Adder:
+# Add Author (1) > Family Name(s): 
+# (Submit the last or family name of the author and press enter)
+# Add Author (1) > Given Name(s):
+# (Submit the first of given names of the author and press enter)
+# Add Author (2) > Family Name(s): --NA
+# (Enter --NA into the family field if the author does not have a family name)
+# Add Author (2) > Given Name(s): --done
+# (Enter --done into either field to exit Author Adder and save the author list to the citation)
+
+
+
