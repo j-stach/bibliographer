@@ -1,7 +1,6 @@
 use v5.14;
 use File::Basename;
-
-use lib '.';
+use lib dirname($0);
 use MLA;
 
 
