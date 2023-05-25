@@ -1,14 +1,40 @@
+
 use v5.14;
+use Getopt::Long;
 use File::Basename;
 use lib dirname($0);
+
+# use Tests;
+# use Help;
 use MLA;
 
+	# Test the libs
+	my $msg = "Hello, Sexy\n";
+	
+	if ($msg =~ $MLA::name_pattern) {
+		print "$msg";
+	}
 
-my $msg = "Hey, Stud\n";
+# Setup raw/save directory access
+my $dir = dirname($0);
+my $root = dirname($dir);
 
-if ($msg =~ $MLA::name_pattern) {
-	print "$msg";
-}
+my $raw_dir = $root.'/raw_bibs/';
+my $save_dir = $root.'/saved_bibs/';
+
+	# Test the dirs
+	if (-d $save_dir && -d $raw_dir) {
+		print "Save directory detected: $save_dir\n";
+		print "Raw directory detected: $raw_dir\n";
+	} else {
+		print "Save/Raw directories not found. Have you set up your program correctly?\n";
+	}
+
+my $state = 'main';
+my $option;
+my $argument;
+
+
 
 # CLI Program:
 # $> bibliographer --new (-N) <bibliography_name>
