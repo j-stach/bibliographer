@@ -34,7 +34,7 @@ if ($shell_path =~ m{/bin/([^/]+)$}) {
 	my $shell = $1;
 	if (my $config = find_shell_config($shell)) {
 		if (modify_config($shell, $config)) {
-			return "Alias successfully created. Restart your shell for changes to take effect.\n";
+			print "Alias successfully created. Restart your shell for changes to take effect.\n";
 		} else {
 			print shell_config_error();
 		}
@@ -62,7 +62,7 @@ sub find_shell_config {
 		'ksh' => '',
 		'csh' => '',
 	);
-	# Configure the user shell instead of the global default, unless the user shell does not have a configuration file.
+	# Configure the user shell instead of the global default. Change this?
 	if (exists $local_config_files{$shell}) {
 		my $config = $local_config_files{$shell};
 		if (-e $config) {
@@ -92,11 +92,15 @@ sub modify_config {
 	my $alias = generate_alias($shell);
 	if (check_config($config, $alias) == 0) {
 		print "Alias not present, adding to $config.\n";
+		add_alias($config, $alias);
 	}
 	if (check_config($config, $alias) == 0) {
-		print "ERROR: Failed to alter $config\n";
+		print "ERROR: Failed to add alias.\n";
 		return 0;
-	} else { return 1; }
+	} else { 
+		print "Alias is present in $config\n";
+		return 1; 
+	}
 }
 
 sub generate_alias {
@@ -113,6 +117,7 @@ sub generate_alias {
 	if (exists $aliases{$shell}) {
 		my $alias = $aliases{$shell};
 		print "Config should contain: alias $alias\n";
+		return $alias;
 	}
 }
 
@@ -129,6 +134,14 @@ sub check_config {
 		print "ERROR: Failed to read $config\n";
 		return 0;
 	}	
+}
+
+sub add_alias {
+	my ($config, $alias) = @_;
+	my $alias_line = "alias $alias\n";
+	open my $fh, '>>', $config or die "ERROR: Failed to modify $config\n$!";
+	print $fh $alias_line;
+	close $fh;
 }
 
 sub shell_config_error {
