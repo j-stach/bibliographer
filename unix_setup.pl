@@ -34,7 +34,7 @@ if ($shell_path =~ m{/bin/([^/]+)$}) {
 	my $shell = $1;
 	if (my $config = find_shell_config($shell)) {
 		if (modify_config($shell, $config)) {
-			print "Alias successfully created. Restart your shell for changes to take effect.\n";
+			print "Setup successful. Restart your shell for changes to take effect.\n";
 		} else {
 			print shell_config_error();
 		}
@@ -47,20 +47,19 @@ if ($shell_path =~ m{/bin/([^/]+)$}) {
 sub find_shell_config {
 	my ($shell) = @_;
 	my %global_config_files = (
-		'bash' => '',
-		'zsh' => '',
+		'bash' => '$ENV{HOME}/.bashrc',
+		'zsh' => '$ENV{HOME}/.zshrc',
 		'fish' => '$ENV{HOME}/.config/fish/config.fish',
-		'tcsh' => '',
-		'ksh' => '',
-		'csh' => '',
+		'tcsh' => '$ENV{HOME}/.tcshrc',
+		'ksh' => '$ENV{HOME}/.kshrc',
+		'csh' => '$ENV{HOME}/.cshrc',
 	);
 	my %local_config_files = (
-		'bash' => '',
-		'zsh' => '',
+		'bash' => '/etc/bash.bashrc',
+		'zsh' => '/etc/zsh/zshrc',
 		'fish' => '/etc/fish/config.fish',
-		'tcsh' => '',
-		'ksh' => '',
-		'csh' => '',
+		'tcsh' => '/etc/tcsh.cshrc',
+		'csh' => '/etc/csh.cshrc',
 	);
 	# Configure the user shell instead of the global default. Change this?
 	if (exists $local_config_files{$shell}) {
@@ -116,7 +115,6 @@ sub generate_alias {
 	);
 	if (exists $aliases{$shell}) {
 		my $alias = $aliases{$shell};
-		print "Config should contain: alias $alias\n";
 		return $alias;
 	}
 }
