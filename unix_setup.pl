@@ -46,7 +46,7 @@ if ($shell_path =~ m{/bin/([^/]+)$}) {
 
 sub find_shell_config {
 	my ($shell) = @_;
-	my %global_config_files = (
+	my %local_config_files = (
 		'bash' => '$ENV{HOME}/.bashrc',
 		'zsh' => '$ENV{HOME}/.zshrc',
 		'fish' => '$ENV{HOME}/.config/fish/config.fish',
@@ -54,7 +54,7 @@ sub find_shell_config {
 		'ksh' => '$ENV{HOME}/.kshrc',
 		'csh' => '$ENV{HOME}/.cshrc',
 	);
-	my %local_config_files = (
+	my %global_config_files = (
 		'bash' => '/etc/bash.bashrc',
 		'zsh' => '/etc/zsh/zshrc',
 		'fish' => '/etc/fish/config.fish',
@@ -62,23 +62,21 @@ sub find_shell_config {
 		'csh' => '/etc/csh.cshrc',
 	);
 	# Configure the user shell instead of the global default. Change this?
-	if (exists $local_config_files{$shell}) {
-		my $config = $local_config_files{$shell};
-		if (-e $config) {
-			print "Config file found at $config\n";
-			return $config;
-		} else {
-			print "ERROR: Shell configuration file not found.\n";
-			print shell_config_error();
-		}
-	} elsif (exists $global_config_files{$shell}) {
+	if (exists $global_config_files{$shell}) {
 		my $config = $global_config_files{$shell};
 		if (-e $config) {
 			print "Config file found at $config\n";
 			return $config;
 		} else {
 			print "ERROR: Shell configuration file not found.\n";
-			print shell_config_error();
+		}
+	} elsif (exists $local_config_files{$shell}) {
+		my $config = $local_config_files{$shell};
+		if (-e $config) {
+			print "Config file found at $config\n";
+			return $config;
+		} else {
+			print "ERROR: Shell configuration file not found.\n";
 		}
 	} else {
 		print "ERROR: Shell configuration file not found.\n";
