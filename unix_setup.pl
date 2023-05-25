@@ -20,7 +20,7 @@ unless (-d $raw_dir) {
 }
 unless (-d $save_dir) {
 	mkdir $save_dir or die "Failed to create directory: $!\nPlease add '$raw_dir' to the root directory.\n";
-	print "Created raw directory: $save_dir\n";
+	print "Created save directory: $save_dir\n";
 }
 
 
