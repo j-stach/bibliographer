@@ -16,85 +16,85 @@ our $name_pattern = qr/(?<family>\pL[\pL'\p{Pd}\s]*),\s+(?<first>(\p{Lu}\.\s?)+|
 #test_name_pattern();
 
 # -- Author
-my $author_pattern = qr/(?<primary>$name_pattern)(,\sand\s(?<secondary>$name_pattern)|(?<others>\set\sal))?/;
+our $author_pattern = qr/(?<primary>$name_pattern)(,\sand\s(?<secondary>$name_pattern)|(?<others>\set\sal))?/;
 #test_author_pattern();
 
 # -- Year
-my $year_pattern = qr/(\p{Nd}{4})/;
+our $year_pattern = qr/(\p{Nd}{4})/;
 #test_year_pattern();
 
 # -- Date
-my $date_pattern = qr/((?<day>\p{Nd}{1,2}(-\p{Nd}{1,2})?)\s)?(?<month>\p{Lu}[\p{Ll}]*\.?)\s(?<year>$year_pattern)/;
+our $date_pattern = qr/((?<day>\p{Nd}{1,2}(-\p{Nd}{1,2})?)\s)?(?<month>\p{Lu}[\p{Ll}]*\.?)\s(?<year>$year_pattern)/;
 #test_date_pattern();
 
 # -- Page Range
-my $page_range_pattern = qr/pp\. (?<start>\p{Nd}+)(\p{Pd}(?<end>\p{Nd}+))?/;
+our $page_range_pattern = qr/pp\. (?<start>\p{Nd}+)(\p{Pd}(?<end>\p{Nd}+))?/;
 #test_page_range_pattern();
 
 # -- Newspaper Page Range
-my $newspaper_page_range_pattern = qr/p\. (?<start>\p{Lu}\p{Nd}+)(\p{Pd}(?<end>\p{Lu}\p{Nd}+))?/;
+our $newspaper_page_range_pattern = qr/p\. (?<start>\p{Lu}\p{Nd}+)(\p{Pd}(?<end>\p{Lu}\p{Nd}+))?/;
 
 # -- Location
-my $location_pattern = qr/(((\p{Lu}[\p{L}'\p{Pd}]*)+(,\s+)?)+)/;
+our $location_pattern = qr/(((\p{Lu}[\p{L}'\p{Pd}]*)+(,\s+)?)+)/;
 #test_location_pattern();
 
 # -- URL
-my $url_pattern = qr/(http(s)?:\/\/)?([\p{Nd}\p{L}]+\.[\p{L}\p{Nd}\p{Pd}_]+\.[\p{L}\p{Nd}]+(\/[\p{L}\p{Nd}\p{Pd}&\+\?=_']*)*)/;
+our $url_pattern = qr/(http(s)?:\/\/)?([\p{Nd}\p{L}]+\.[\p{L}\p{Nd}\p{Pd}_]+\.[\p{L}\p{Nd}]+(\/[\p{L}\p{Nd}\p{Pd}&\+\?=_']*)*)/;
 #test_url_pattern();
 
 # -- Thesis Type
-my $thesis_type_pattern = qr/[\p{L}\.'\s]+/;
+our $thesis_type_pattern = qr/[\p{L}\.'\s]+/;
 
 # -- Article Title
-my $article_title_pattern = qr/"((?:[^"]|"")*\p{Po}+)"/;
+our $article_title_pattern = qr/"((?:[^"]|"")*\p{Po}+)"/;
 #test_article_title_pattern();
 
 # -- Book Title
-my $book_title_pattern = qr/((\p{Lu}[\p{Lu}\p{Ll}\p{Pd}']*)\s?(((\p{Lu}[\p{Lu}\p{Ll}\p{Pd}']*)|([\p{Ll}\p{Pd}'\p{N}]*))\s?)*)+/;
+our $book_title_pattern = qr/((\p{Lu}[\p{Lu}\p{Ll}\p{Pd}']*)\s?(((\p{Lu}[\p{Lu}\p{Ll}\p{Pd}']*)|([\p{Ll}\p{Pd}'\p{N}]*))\s?)*)+/;
 #test_book_title_pattern();
 
 # -- Journal Name
-my $journal_name_pattern = qr/\b(\p{Lu}[\pL\p{Pd}&'\.\s]*(, vol\. \p{Nd}+, no\. \p{Nd}+)?)/;
+our $journal_name_pattern = qr/\b(\p{Lu}[\pL\p{Pd}&'\.\s]*(, vol\. \p{Nd}+, no\. \p{Nd}+)?)/;
 #test_journal_name_pattern();
 
 # -- Publisher Name
-my $publisher_name_pattern = qr/(((\p{Lu}[\pL\p{Pd}'\.]*)+(,??\s)??)+)/;
+our $publisher_name_pattern = qr/(((\p{Lu}[\pL\p{Pd}'\.]*)+(,??\s)??)+)/;
 #test_publisher_name_pattern();
 
 # -- Website Name
-my $website_name_pattern = qr/(([\p{L}\p{Nd}\p{Pd}_']+([\.,\s]*?)*)*)/;
+our $website_name_pattern = qr/(([\p{L}\p{Nd}\p{Pd}_']+([\.,\s]*?)*)*)/;
 #test_website_name_pattern();
 
 # -- Institution Name
-my $institution_name_pattern = qr/(((\p{Lu}|\p{Ll})[\p{Ll}\p{Pd}'\.]*(,??\s)?)+)/;
+our $institution_name_pattern = qr/(((\p{Lu}|\p{Ll})[\p{Ll}\p{Pd}'\.]*(,??\s)?)+)/;
 #test_institution_name_pattern();
 
 # -- Journal Citation Format
-my $journal_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$article_title_pattern)\s+(?<journal>$journal_name_pattern),\s+(?<year>$year_pattern),\s+(?<pages>$page_range_pattern)\./;
+our $journal_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$article_title_pattern)\s+(?<journal>$journal_name_pattern),\s+(?<year>$year_pattern),\s+(?<pages>$page_range_pattern)\./;
 #test_journal_citation_pattern();
 
 # -- Book Citation Format
-my $book_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$book_title_pattern)\.\s+(?<publisher>$publisher_name_pattern),\s+(?<year>$year_pattern)(,\s+(?<pages>$page_range_pattern))?\./;
+our $book_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$book_title_pattern)\.\s+(?<publisher>$publisher_name_pattern),\s+(?<year>$year_pattern)(,\s+(?<pages>$page_range_pattern))?\./;
 #test_book_citation_pattern();
 
 # -- Newspaper Article Citation Format
-my $newspaper_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<newspaper>$publisher_name_pattern),\s+(?<date>$date_pattern),\s+(?<pages>$newspaper_page_range_pattern)\./;
+our $newspaper_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<newspaper>$publisher_name_pattern),\s+(?<date>$date_pattern),\s+(?<pages>$newspaper_page_range_pattern)\./;
 #test_newspaper_citation_pattern();
 
 # -- Magazine Article Citation Format
-my $magazine_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<magazine>$publisher_name_pattern),\s+((?<issue>vol\.\s\p{Nd},\sno\.\s\p{Nd}*),\s+)?(?<date>$date_pattern),\s+(?<pages>$page_range_pattern)\./;
+our $magazine_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<magazine>$publisher_name_pattern),\s+((?<issue>vol\.\s\p{Nd},\sno\.\s\p{Nd}*),\s+)?(?<date>$date_pattern),\s+(?<pages>$page_range_pattern)\./;
 #test_magazine_citation_pattern();
 
 # -- Website Citation Format
-my $website_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<website>$website_name_pattern)(,\s+(?<publisher>$publisher_name_pattern))?,\s+(?<date>$date_pattern),\s+(?<url>$url_pattern)(\.\s+Accessed\s(?<retrieval_date>$date_pattern))?\./;
+our $website_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<website>$website_name_pattern)(,\s+(?<publisher>$publisher_name_pattern))?,\s+(?<date>$date_pattern),\s+(?<url>$url_pattern)(\.\s+Accessed\s(?<retrieval_date>$date_pattern))?\./;
 #test_website_citation_pattern();
 
 # -- Conference Paper Citation Format
-my $conference_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$article_title_pattern)\s+(?<conference>$institution_name_pattern),\s+(?<dates>$date_pattern),\s+(?<location>$location_pattern)\./;
+our $conference_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$article_title_pattern)\s+(?<conference>$institution_name_pattern),\s+(?<dates>$date_pattern),\s+(?<location>$location_pattern)\./;
 #test_conference_citation_pattern();
 
 # -- Dissertation/Thesis Citation Format
-my $thesis_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$article_title_pattern)\s+(?<type>$thesis_type_pattern),\s+(?<institution>$institution_name_pattern),\s+(?<year>$year_pattern)\./;
+our $thesis_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$article_title_pattern)\s+(?<type>$thesis_type_pattern),\s+(?<institution>$institution_name_pattern),\s+(?<year>$year_pattern)\./;
 #test_thesis_citation_pattern();
 
 

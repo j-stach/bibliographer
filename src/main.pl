@@ -1,4 +1,6 @@
-use v5.36;
+use v5.14;
+use File::Basename;
+
 use lib '.';
 use MLA;
 
@@ -8,11 +10,6 @@ my $msg = "Hey, Stud\n";
 if ($msg =~ $MLA::name_pattern) {
 	print "$msg";
 }
-
-# Installer:
-# Installs/updates perl to v5.36 and runs cpan on any needed modules
-# Checks for the existence of bibliographer directory, if missing, creates a new one for saving raw files
-# Modifies the bash file to add a script shortcut named "bibliographer"
 
 # CLI Program:
 # $> bibliographer --new (-N) <bibliography_name>
