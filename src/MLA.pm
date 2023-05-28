@@ -82,7 +82,7 @@ our $newspaper_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title
 #test_newspaper_citation_pattern();
 
 # -- Magazine Article Citation Format
-our $magazine_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<magazine>$publisher_name_pattern),\s+((?<issue>vol\.\s\p{Nd},\sno\.\s\p{Nd}*),\s+)?(?<date>$date_pattern),\s+(?<pages>$page_range_pattern)\./;
+our $magazine_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<magazine>$publisher_name_pattern),\s+((?<issue>vol\.\s\p{Nd}+,\sno\.\s\p{Nd}+),\s+)?(?<date>$date_pattern),\s+(?<pages>$page_range_pattern)\./;
 #test_magazine_citation_pattern();
 
 # -- Website Citation Format

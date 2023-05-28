@@ -1,7 +1,6 @@
 
 use strict;
 use warnings;
-use File::Basename;
 use Cwd;
 
 # Script for setting up program on Linux and MacOS systems
