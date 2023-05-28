@@ -1,5 +1,5 @@
 
-use v5.14;
+use v5.36;
 use Getopt::Long;
 use File::Basename;
 use lib dirname($0);
@@ -21,56 +21,51 @@ my $state = 'main';
 
 	
 my @style;
-sub style { my ($arg) = @_; push @style, $arg; }
+sub style { my ($style) = @_; push @style, $style; }
 sub check_style {
 	if (@style > 1 || @style == 0) { 
-		my $style_count = @style;
-		print "Expected exactly 1 CITATION_STYLE flag. $style_count found.\n";
+		my $count = @style;
+		print "Expected exactly 1 CITATION_STYLE flag. $count found.\n";
 	       	return 0;	
 	} else { return 1; }
 }
 
 my @option;
-sub option { my (@arg) = @_; push @option, @arg; }
-sub check_option {
-	if (@option > 1) {
-		my $option_count = @option;
-		print "Maximum of 1 option expected. $option_count found.\n";
+sub option { my ($ref) = @_; push @option, $ref; }
+sub check_options {
+	if (scalar @option > 1) {
+		my $count = scalar @option;
+		print "Maximum of 1 option permitted. $count found.\n";
 		return 0;
 	} else { return 1; }
 }
 
 
-my @help;
-my @test;
+my $help;
+my $test;
 my @convert;
 my @export;
 
 GetOptions (
-	'test|T' => sub { &option(@test = (1)) },
-	'help|H' => sub { &option(@help = (1)) },
-	'convert|C=s{1,2}' => sub { @convert = [@_]; &option(@convert); },
-	'export|X=s{1,2}' => sub { &option(@export) },
+	'test|T' => sub { $test = 1; &option($test) },
+	'help|H' => sub { $help = 1; &option($help) },
+	'convert|C=s{1,2}' => sub { @convert = @_; &option(\@convert) },
+	'export|X=s{1,2}' => sub { @export = @_; &option(\@export) },
 
 	'MLA' => sub { &style("MLA") },
 	'RAW' => sub { &style("RAW") },
-) or help();
+) or &Help::help;
+
 
 	#### TO DO ####
-if (check_option()) {
-	if (@help) { &Help::help }
-	elsif (@test) { &Test::test }
-	elsif (@convert) { convert() }
-	elsif (@export) { export() }
-}
 
 
 sub convert {
-	my ($file, $new_file) = @_;
+	my ($file, $new) = @_;
 	if (check_style()) {
-		my $style = @style[0];
+		my $style = $style[0];
 		print "Convert $file to $style";
-		if ($new_file) { print " and save as $new_file"; }
+		if ($new) { print " and save as $new"; }
 		print "\n";
 	}
 }
