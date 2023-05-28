@@ -4,6 +4,9 @@ use Getopt::Long;
 use File::Basename;
 use lib dirname($0);
 
+use Test;
+use Help;
+
 use MLA;
 
 # Setup raw/save directory access
@@ -27,93 +30,48 @@ sub check_style {
 	} else { return 1; }
 }
 
-	#### TO DO ####
 my @option;
-sub option {}
-sub check_option {}
+sub option { my (@arg) = @_; push @option, @arg; }
+sub check_option {
+	if (@option > 1) {
+		my $option_count = @option;
+		print "Maximum of 1 option expected. $option_count found.\n";
+		return 0;
+	} else { return 1; }
+}
 
-my $help;
-my $test;
-my $convert;
-my $export;
+
+my @help;
+my @test;
+my @convert;
+my @export;
 
 GetOptions (
-# Need to make these options mutually exclusive and check for multiples before calling subroutines
-	'test|T' => \&test,
-	'help|H' => \&help,
-	'convert|C=s{1,2}' => \$convert,
-	'export|X=s{1,2}' => \&export,
+	'test|T' => sub { &option(@test = (1)) },
+	'help|H' => sub { &option(@help = (1)) },
+	'convert|C=s{1,2}' => sub { @convert = [@_]; &option(@convert); },
+	'export|X=s{1,2}' => sub { &option(@export) },
 
 	'MLA' => sub { &style("MLA") },
 	'RAW' => sub { &style("RAW") },
 ) or help();
 
 	#### TO DO ####
-	# if (check_option()) {}
-if ($convert) {&convert()}
-
-
-sub test {
-	# Test the libs
-	my $msg = "Hello, Sexy\n";
-	
-	if ($msg =~ $MLA::name_pattern) {
-		print "$msg";
-	}
-	
-	# Test the dirs
-	if (-d $save_dir && -d $raw_dir) {
-		print "Save directory detected: $save_dir\n";
-		print "Raw directory detected: $raw_dir\n";
-	} else {
-		print "Save/Raw directories not found. Have you set up your program correctly?\n";
-	}
-
-	# Write more comprehensive testing in the Test module to be run to ensure proper setup for libs
+if (check_option()) {
+	if (@help) { &Help::help }
+	elsif (@test) { &Test::test }
+	elsif (@convert) { convert() }
+	elsif (@export) { export() }
 }
 
-sub help { 
-print "\
-BIBLIOGRAPHER -- HELP DOCUMENTATION
-    Bibliographer is a CLI tool for quickly converting rich-text formatted bibliography files from one citation style to another.
-
-OPTIONS
-    -H, --help
-        Displays this help documentation.
-
-    -T, --test
-    	Run integration testing to ensure the program has been set up correctly.
-
-    -C (or --convert) <filename.rtf> [<new_filename>] --CITATION_STYLE
-    	Converts filename.rtf into the new CITATION_STYLE, overwriting it in the process. 
-	If <new_filename> is provided, the reformatted bibliography will be saved as ./saved_bibs/new_filename.rtf instead.
-	If --RAW is selected as the CITATION_STYLE, the original file will not be modified,
-	and the raw bibliography info will be saved as ./raw_bibs/filename.raw.txt
-        If <new_filename> is provided, the raw bibliography will be saved as ./raw_bibs/new_filename.raw.txt instead.
-
-    -X (or --export) <bibliography_name> [<new_filename>] --CITATION_STYLE
-        Exports ./raw_bibs/bibliography_name.raw.txt formatted to CITATION_STYLE as ./saved_bibs/bibliography_file.rtf
-        If <new_filename> is provided, it will be exported as ./saved_bibs/new_filename.rtf instead.
-
-CITATION_STYLE
-    --MLA (Modern Language Association)
-    --RAW (For converting a formatted file to an unformatted bibliography)
-
-EXAMPLES
-    \$> bibliographer --convert filename.rtf new_file --RAW
-    	This extracts the citation info from filename.rtf and saves it as ./raw_bibs/new_file.raw.txt without formatting the citations.
-
-    \$> bibliographer -C filename.rtf --MLA	 or	bibliographer --MLA --convert filename.rtf
-    	These overwrite filename.rtf in the MLA citation style.
-
-    \$> bibliographer -X bibliography --MLA
-    	This searches ./raw_bibs/ for bibliography.raw.txt and exports it to ./saved_bibs/bibliography.rtf in the MLA citation style.
-\n"; }
 
 sub convert {
+	my ($file, $new_file) = @_;
 	if (check_style()) {
 		my $style = @style[0];
-		print "$style\n";
+		print "Convert $file to $style";
+		if ($new_file) { print " and save as $new_file"; }
+		print "\n";
 	}
 }
 
