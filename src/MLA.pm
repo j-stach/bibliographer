@@ -122,7 +122,7 @@ sub test_name_pattern {
 }
 
 sub test_author_pattern {
-	my $test_author_1 = "Lennon, John, and McCarthy, Paul";
+	my $test_author_1 = "Lennon, John, and McCartney, Paul";
 	my $test_author_2 = "Crosby, David et al.";
 	my $test_author_3 = "Van Halen, Eddie";
 	
@@ -136,17 +136,16 @@ sub test_author_pattern {
 		       	if ($author_1 =~ $name_pattern) {
 				my $first_name_1 = $+{first};
 				my $last_name_1 = $+{family};
-				print "Author found: $first_name_1 $last_name_1 ";
+				print "Author found: $first_name_1 $last_name_1\n";
 			}
 			if ($author_2 =~ $name_pattern) {
 				my $first_name_2 = $+{first};
 				my $last_name_2 = $+{family};
 				print "Author found: $first_name_2 $last_name_2\n";
-			} elsif ($others) {
+			} 
+			if ($others) {
 				print "and others\n";
-			} else {
-				print "\n";
-			}
+			} 
 		} else {
 			print "Couldn't parse $author\n";
 		}
