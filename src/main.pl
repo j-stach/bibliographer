@@ -43,14 +43,14 @@ sub check_options {
 
 my $help;
 my $test;
-my @convert;
-my @export;
+my $convert;
+my $export;
 
 GetOptions (
-	'test|T' => sub { $test = 1; &option($test) },
-	'help|H' => sub { $help = 1; &option($help) },
-	'convert|C=s{1,2}' => sub { @convert = @_; &option(\@convert) },
-	'export|X=s{1,2}' => sub { @export = @_; &option(\@export) },
+	'test|T' => sub { $test = 1; option($test) },
+	'help|H' => sub { $help = 1; option($help) },
+	'convert|C=s{1,2}' => sub { $convert = @_; option(\$convert) },
+	'export|X=s{1,2}' => sub { $export = @_; option(\$export) },
 
 	'MLA' => sub { &style("MLA") },
 	'RAW' => sub { &style("RAW") },
@@ -58,7 +58,7 @@ GetOptions (
 
 
 	#### TO DO ####
-
+check_options();
 
 sub convert {
 	my ($file, $new) = @_;
