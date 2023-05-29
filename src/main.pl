@@ -18,7 +18,6 @@ my $save_dir = $root.'/saved_bibs/';
 # Set the program state
 my $state = 'main';
 	
-
 	
 my @style;
 sub style { my ($style) = @_; push @style, $style; }
@@ -28,7 +27,7 @@ sub check_style {
 		print "Expected exactly 1 CITATION_STYLE flag. $count found.\n";
 	       	return 0	
 	} else { return 1 }
-}
+} # MODIFY TO ENABLE 0 STYLE SELECTION, TO ELIMINATE NEED FOR "RAW" TYPE
 
 my @options;
 sub option { my ($ref) = @_; push @options, $ref; }
@@ -67,10 +66,11 @@ if (check_options()) {
 		my $file = $convert[0]; my $new = $convert[1];
 		convert($file, $new)
 	}
-	elsif (@export) {}
+	elsif (@export) {
+		my $raw = $export[0]; my $new = $export[1];
+		export($raw, $new)
+	}
 }
-
-
 
 
 
@@ -82,10 +82,28 @@ sub convert {
 		print "Convert $file to $style";
 		if ($new) { print " and save as $new"; }
 		print "\n";
-	}
+	} # MODIFY TO ENABLE CONVERSION TO RAW TYPE WHEN CITATION_STYLE IS NOT PROVIDED
 }
 
-sub export {}
+sub export {
+	my ($raw, $new) = @_;
+	if (check_style() && $style[0] !~ "RAW") {
+		my $style = $style[0];
+		print "Convert $raw to $style";
+		if ($new) { print " and save as $new"; }
+		else { $new = $raw; }
+		print "\n";
+	} elsif ($style[0] =~ "RAW") { print "$raw is already in raw format.\n"; }
+} # MODIFY TO REMOVE "RAW" TYPE AND REQUIRE CITATION_TYPE
+
+
+# FILE HANDLERS
+
+# IDENTIFY FORMAT TYPE or PARSE USING REGEX FROM UNKNOWN FORMATTING
+
+# CONVERT TO RAW BIBLIOGRAPHY
+
+# FORMAT RAW AS STYLE
 
 
 
