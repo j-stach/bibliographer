@@ -39,6 +39,7 @@ GetOptions (
 	# VERSION
 	# VERBOSE / QUIET
 	# CONFIG
+	# FIX
 
 	'MLA' => sub { &style("MLA") },
 );
@@ -83,25 +84,18 @@ sub convert {
 	my ($file, $new) = @_;
 	if (check_style() == 1) {
 		my $style = $style[0];
-		print "Convert $file to $style";
-		if ($new) { print " and save as $new"; }
-		print "\n";
+		print "Convert $file to $style"; if ($new) { print " and save as $new"; } print "\n";
 	} elsif (check_style() == 0) {
-		print "Convert $file to raw";
-		if ($new) { print " and save as $new"; }
-		print "\n";
+		print "Convert $file to raw"; if ($new) { print " and save as $new"; } print "\n";
 	}
 }
 
 sub export {
 	my ($raw, $new) = @_;
 	if (check_style() == 1) {
-		my $style = $style[0];
-		print "Convert $raw to $style";
-		if ($new) { print " and save as $new"; }
-		else { $new = $raw; }
-		print "\n";
-	} elsif (check_style() == 0) { print "$raw is already in raw format.\n"; }
+		my $style = $style[0]; 
+		print "Convert $raw to $style"; if ($new) { print " and save as $new"; } print "\n";
+	} elsif (check_style() == 0) { print "Cannot export as raw. Please provide a CITATION_STYLE flag.\n"; }
 }
 
 
@@ -140,6 +134,10 @@ sub find_rawfile {
 }
 
 # FILE HANDLER SUBS
+# open filename
+# new filename
+# open rawfile
+# new rawfile
 
 # IDENTIFY FORMAT TYPE or PARSE USING REGEX FROM UNKNOWN FORMATTING
 
