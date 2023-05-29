@@ -26,39 +26,54 @@ sub check_style {
 	if (@style > 1 || @style == 0) { 
 		my $count = @style;
 		print "Expected exactly 1 CITATION_STYLE flag. $count found.\n";
-	       	return 0;	
-	} else { return 1; }
+	       	return 0	
+	} else { return 1 }
 }
 
-my @option;
-sub option { my ($ref) = @_; push @option, $ref; }
+my @options;
+sub option { my ($ref) = @_; push @options, $ref; }
 sub check_options {
-	if (scalar @option > 1) {
-		my $count = scalar @option;
+	if (scalar @options > 1) {
+		my $count = scalar @options;
 		print "Maximum of 1 option permitted. $count found.\n";
-		return 0;
-	} else { return 1; }
+		return 0
+	} else { return 1 }
 }
-
 
 my $help;
 my $test;
-my $convert;
-my $export;
+my @convert;
+my @export;
 
 GetOptions (
 	'test|T' => sub { $test = 1; option($test) },
 	'help|H' => sub { $help = 1; option($help) },
-	'convert|C=s{1,2}' => sub { $convert = @_; option(\$convert) },
-	'export|X=s{1,2}' => sub { $export = @_; option(\$export) },
+	'convert|C=s{1,2}' => \@convert,
+	'export|X=s{1,2}' => \@export,
 
 	'MLA' => sub { &style("MLA") },
 	'RAW' => sub { &style("RAW") },
 ) or &Help::help;
 
+if (@convert) { option(\@convert) }
+if (@export) { option(\@export) }
 
-	#### TO DO ####
-check_options();
+if (scalar @options == 0) { &Help::help }
+
+if (check_options()) {
+	if ($help) { &Help::help }
+	elsif ($test) { &Test::test }
+	elsif (@convert) {
+		my $file = $convert[0]; my $new = $convert[1];
+		convert($file, $new)
+	}
+	elsif (@export) {}
+}
+
+
+
+
+
 
 sub convert {
 	my ($file, $new) = @_;
