@@ -20,10 +20,10 @@ OPTIONS
     -T, --test
     	Run integration testing to ensure the program has been set up correctly.
 
-    -C (or --convert) <filename.rtf> [<new_filename>] --CITATION_STYLE
+    -C (or --convert) <filename.rtf> [<new_filename>] [--CITATION_STYLE]
     	Converts filename.rtf into the new CITATION_STYLE, overwriting it in the process. 
 	If <new_filename> is provided, the reformatted bibliography will be saved as ./saved_bibs/new_filename.rtf instead.
-	If --RAW is selected as the CITATION_STYLE, the original file will not be modified,
+	If no CITATION_STYLE is provided, the original file will not be modified,
 	and the raw bibliography info will be saved as ./raw_bibs/filename.raw.txt
         If <new_filename> is provided, the raw bibliography will be saved as ./raw_bibs/new_filename.raw.txt instead.
 
@@ -33,7 +33,6 @@ OPTIONS
 
 CITATION_STYLE
     --MLA (Modern Language Association)
-    --RAW (For converting a formatted file to an unformatted bibliography)
 
 EXAMPLES
     \$> bibliographer --convert filename.rtf new_file --RAW

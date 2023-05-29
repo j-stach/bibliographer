@@ -1,5 +1,6 @@
 
 use v5.36;
+use Cwd;
 use Getopt::Long;
 use File::Basename;
 use lib dirname($0);
@@ -15,90 +16,128 @@ my $root = dirname($dir);
 my $raw_dir = $root.'/raw_bibs/';
 my $save_dir = $root.'/saved_bibs/';
 	
-# Set the program state
-my $state = 'main';
-	
-	
+
 my @style;
 sub style { my ($style) = @_; push @style, $style; }
 sub check_style {
-	if (@style > 1 || @style == 0) { 
+	if (@style == 0) { return 0 } 
+	elsif (@style == 1) { return 1 }
+	elsif (@style > 1) {
 		my $count = @style;
-		print "Expected exactly 1 CITATION_STYLE flag. $count found.\n";
-	       	return 0	
-	} else { return 1 }
-} # MODIFY TO ENABLE 0 STYLE SELECTION, TO ELIMINATE NEED FOR "RAW" TYPE
-
-my @options;
-sub option { my ($ref) = @_; push @options, $ref; }
-sub check_options {
-	if (scalar @options > 1) {
-		my $count = scalar @options;
-		print "Maximum of 1 option permitted. $count found.\n";
-		return 0
-	} else { return 1 }
-} # CONSIDER USING REGEX OVER @ARGV FOR COMMANDS, AND RESERVING OPTIONS FOR MINOR FUNCTIONALITY ALTERATIONS
-
-my $help;
-my $test;
-my @convert;
-my @export;
-
-GetOptions (
-	'test|T' => sub { $test = 1; option($test) },
-	'help|H' => sub { $help = 1; option($help) },
-	'convert|C=s{1,2}' => \@convert,
-	'export|X=s{1,2}' => \@export,
-
-	'MLA' => sub { &style("MLA") },
-	'RAW' => sub { &style("RAW") },
-) or &Help::help;
-
-if (@convert) { option(\@convert) }
-if (@export) { option(\@export) }
-
-if (scalar @options == 0) { &Help::help }
-
-if (check_options()) {
-	if ($help) { &Help::help }
-	elsif ($test) { &Test::test }
-	elsif (@convert) {
-		my $file = $convert[0]; my $new = $convert[1];
-		convert($file, $new)
-	}
-	elsif (@export) {
-		my $raw = $export[0]; my $new = $export[1];
-		export($raw, $new)
+		print "Multiple CITATION_STYLE flags detected: $count found. Please submit only one citation style.\n";
+		return 2
 	}
 }
 
-# ADD HELP COMMAND TO VIEW OVERALL HELP DOCUMENTATION
-# CHANGE HELP OPTION TO PREVENT COMMAND FROM EXECUTING AND INSTEAD DISPLAY MORE DETAILED INSTRUCTIONS
-# DISPLAY OVERALL HELP WHEN RUN WITHOUT COMMANDS
+my $help;
+my $test;
+
+GetOptions (
+	'test|T' => \$test,
+	'help|H' => \$help,
+	
+	# VERSION
+	# VERBOSE / QUIET
+	# CONFIG
+
+	'MLA' => sub { &style("MLA") },
+);
+
+my $command; 
+my @args;
+
+if (!$test && !$help) {
+	command();
+} 
+elsif ($test) { &Test::test } # CHANGE TEST TO PERFORM COMMAND-SPECIFIC UNIT TESTING
+elsif ($help) { &Help::help } # CHANGE HELP TO PROVIDE COMMAND-SPECIFIC HELP DOCUMENTATION
+
+sub command {
+	if (@ARGV) {
+		($command, @args) = @ARGV;
+		run_command();
+	} else { &Help::help }
+}
+
+sub run_command {
+	if ($command eq 'convert') {
+		if (@args == 1 || @args == 2) {
+			my ($file, $new) = @args;
+			convert($file, $new)
+		} elsif (@args == 0) { print "ERROR: 'convert' expected filename argument.\n"; }
+		else { print "ERROR: 'convert' should have 1 or 2 arguments: @args found.\n"; }		
+	} elsif ($command eq 'export') {
+		if (@args == 1 || @args == 2) {
+			my ($file, $new) = @args;
+			export($file, $new)
+		} elsif (@args == 0) { print "ERROR: 'export' expected bibliography name argument.\n"; }
+		else { print "ERROR: 'export' should have 1 or 2 arguments: @args found.\n"; }		
+	} else {
+		print "Command not recognized. Use --help to view available commands.\n";
+	}
+}
 
 
 
 sub convert {
 	my ($file, $new) = @_;
-	if (check_style()) {
+	if (check_style() == 1) {
 		my $style = $style[0];
 		print "Convert $file to $style";
 		if ($new) { print " and save as $new"; }
 		print "\n";
-	} # MODIFY TO ENABLE CONVERSION TO RAW TYPE WHEN CITATION_STYLE IS NOT PROVIDED
+	} elsif (check_style() == 0) {
+		print "Convert $file to raw";
+		if ($new) { print " and save as $new"; }
+		print "\n";
+	}
 }
 
 sub export {
 	my ($raw, $new) = @_;
-	if (check_style() == 1 && $style[0] !~ "RAW") {
+	if (check_style() == 1) {
 		my $style = $style[0];
 		print "Convert $raw to $style";
 		if ($new) { print " and save as $new"; }
 		else { $new = $raw; }
 		print "\n";
-	} elsif ($style[0] =~ "RAW") { print "$raw is already in raw format.\n"; }
-} # MODIFY TO REMOVE "RAW" TYPE AND REQUIRE CITATION_TYPE
+	} elsif (check_style() == 0) { print "$raw is already in raw format.\n"; }
+}
 
+
+sub find_filename {
+	my ($filename) = @_;
+	if ($filename =~ /\.rtf$/) {
+		my $cwd = getcwd();
+		if (-e "$cwd/$filename") {
+			my $file = "$cwd/$filename";
+			print "$filename found in $cwd\n";
+			return $file
+		}
+		elsif ($filename =~ "/" && (-e "$filename")) {
+			print "File path $filename found. Use it? (Y/n) ";
+			my $response = <STDIN>;
+			if ($response eq ('y' || 'Y' || "\n")) { return $filename }
+			else { print "ERROR: $filename could not be located.\n"; }
+		}
+		elsif (-e "$save_dir/$filename") {
+			my $file = "$save_dir/$filename";
+			print "$filename found in bibliographer save directory. Use it? (Y/n) ";
+			my $response = <STDIN>;
+			if ($response eq ('y' || 'Y' || "\n")) { return $file }
+			else { print "ERROR: $filename could not be located.\n"; }
+		} else { print "ERROR: $filename could not be located.\n"; }
+	} else { print "ERROR: File to be read ($filename) must have '.rtf' file extension.\n"; }
+}
+
+sub find_rawfile {
+	my ($rawfile) = @_;
+	my $raw = "$raw_dir/$rawfile.raw.txt";
+	if (-e "$raw") {
+		print "$rawfile found.\n";
+		return $raw
+	} else { print "ERROR: $raw could not be found.\n"; }
+}
 
 # FILE HANDLER SUBS
 
