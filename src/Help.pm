@@ -14,11 +14,14 @@ BIBLIOGRAPHER -- HELP DOCUMENTATION
     Bibliographer is a CLI tool for quickly converting rich-text formatted bibliography files from one citation style to another.
 
 OPTIONS
-    -H, --help
+    -h, --help
         Displays this help documentation.
 
-    -T, --test
+    -t, --test
     	Run integration testing to ensure the program has been set up correctly.
+
+    -v, --version
+    	Displays the version number and year.
 
 COMMANDS
     convert <filename.rtf> [<new_filename>] [--CITATION_STYLE]

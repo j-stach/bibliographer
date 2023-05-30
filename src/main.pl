@@ -10,6 +10,8 @@ use Help;
 
 use MLA;
 
+my $version = "version 0.1 2023";
+
 # Setup raw/save directory access
 my $dir = dirname($0);
 my $root = dirname($dir);
@@ -33,10 +35,10 @@ my $help;
 my $test;
 
 GetOptions (
-	'test|T' => \$test,
-	'help|H' => \$help,
-	
-	# VERSION
+	'test|t' => \$test,
+	'help|h' => \$help,
+	'version|v'=> sub { print "$version\n" },
+
 	# VERBOSE / QUIET
 	# CONFIG (command?) or separate file, for holding configuration parameters and API keys
 	# FIX (command?) attempts to retrieve missing citation info
