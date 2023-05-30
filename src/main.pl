@@ -82,20 +82,24 @@ sub run_command {
 
 sub convert {
 	my ($file, $new) = @_;
-	if (check_style() == 1) {
-		my $style = $style[0];
-		print "Convert $file to $style"; if ($new) { print " and save as $new"; } print "\n";
-	} elsif (check_style() == 0) {
-		print "Convert $file to raw"; if ($new) { print " and save as $new"; } print "\n";
+	if (my $filename = find_filename($file)) {
+		if (check_style() == 1) {
+			my $style = $style[0];
+			print "Convert $filename to $style"; if ($new) { print " and save as $new.rtf"; } print "\n";
+		} elsif (check_style() == 0) {
+			print "Convert $filename to raw"; if ($new) { print " and save as $new.raw.txt"; } print "\n";
+		}
 	}
 }
 
 sub export {
 	my ($raw, $new) = @_;
-	if (check_style() == 1) {
-		my $style = $style[0]; 
-		print "Convert $raw to $style"; if ($new) { print " and save as $new"; } print "\n";
-	} elsif (check_style() == 0) { print "Cannot export as raw. Please provide a CITATION_STYLE flag.\n"; }
+	if (my $rawfile = find_rawfile($raw)) {
+		if (check_style() == 1) {
+			my $style = $style[0]; 
+			print "Convert $raw to $style"; if ($new) { print " and save as $new.rtf"; } print "\n";
+		} elsif (check_style() == 0) { print "Cannot export as raw. Please provide a CITATION_STYLE flag.\n"; }
+	}
 }
 
 
@@ -104,46 +108,51 @@ sub find_filename {
 	if ($filename =~ /\.rtf$/) {
 		my $cwd = getcwd();
 		if (-e "$cwd/$filename") {
-			my $file = "$cwd/$filename";
+			my $file = "$cwd"."$filename";
 			print "$filename found in $cwd\n";
 			return $file
 		}
 		elsif ($filename =~ "/" && (-e "$filename")) {
 			print "File path $filename found. Use it? (Y/n) ";
 			my $response = <STDIN>;
-			if ($response eq ('y' || 'Y' || "\n")) { return $filename }
-			else { print "ERROR: $filename could not be located.\n"; }
+			if ($response =~ /^y\n$|^Y\n$|^\n$/) { return $filename }
+			else { print "ERROR: $filename could not be located.\n"; exit }
 		}
 		elsif (-e "$save_dir/$filename") {
-			my $file = "$save_dir/$filename";
+			my $file = "$save_dir"."$filename";
 			print "$filename found in bibliographer save directory. Use it? (Y/n) ";
 			my $response = <STDIN>;
-			if ($response eq ('y' || 'Y' || "\n")) { return $file }
-			else { print "ERROR: $filename could not be located.\n"; }
-		} else { print "ERROR: $filename could not be located.\n"; }
-	} else { print "ERROR: File to be read ($filename) must have '.rtf' file extension.\n"; }
+			if ($response =~ /^y\n$|^Y\n$|^\n$/) { return $file }
+			else { print "ERROR: $filename could not be located.\n"; exit }
+		} else { print "ERROR: $filename could not be located.\n"; exit }
+	} else { print "ERROR: File to be read ($filename) must have '.rtf' file extension.\n"; exit }
 }
 
 sub find_rawfile {
 	my ($rawfile) = @_;
-	my $raw = "$raw_dir/$rawfile.raw.txt";
+	my $raw = "$raw_dir"."$rawfile.raw.txt";
 	if (-e "$raw") {
 		print "$rawfile found.\n";
 		return $raw
-	} else { print "ERROR: $raw could not be found.\n"; }
+	} else { print "ERROR: $raw could not be found.\n"; exit }
 }
 
 # FILE HANDLER SUBS
-# open filename
-# new filename
-# open rawfile
-# new rawfile
+# open_filename
+# new_filename
+# open_rawfile
+# new_rawfile
 
 # IDENTIFY FORMAT TYPE or PARSE USING REGEX FROM UNKNOWN FORMATTING
+# id_format
+# brute_parse using flexible regex pattern
 
 # CONVERT TO RAW BIBLIOGRAPHY
+# fmt_to_raw
+# id_medium to determine which pattern has matched
 
 # FORMAT RAW AS STYLE
+# raw_to_fmt
 
 
 
