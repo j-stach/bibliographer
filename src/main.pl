@@ -38,8 +38,9 @@ GetOptions (
 	
 	# VERSION
 	# VERBOSE / QUIET
-	# CONFIG
-	# FIX
+	# CONFIG (command?) or separate file, for holding configuration parameters and API keys
+	# FIX (command?) attempts to retrieve missing citation info
+	# STRICT will not export if all patterns cannot be identified and all information is not present
 
 	'MLA' => sub { &style("MLA") },
 );
@@ -138,21 +139,37 @@ sub find_rawfile {
 }
 
 # FILE HANDLER SUBS
-# open_filename
+# read_filename
 # new_filename
-# open_rawfile
+# read_rawfile
 # new_rawfile
 
 # IDENTIFY FORMAT TYPE or PARSE USING REGEX FROM UNKNOWN FORMATTING
 # id_format
-# brute_parse using flexible regex pattern
+	# look at the first citation with an author to narrow down the formats
+	# then find (a website? a book?) a landmark citation with distinctive elements to attempt to match patterns for those styles
+	# if none match, warn, then attempt brute parse
+# brute_parse 
+	# using flexible regex pattern, attempt to locate elements from the citation according to generics
+	# use crossref api to identify medium type
 
 # CONVERT TO RAW BIBLIOGRAPHY
 # fmt_to_raw
+	# open file (read)
+	# id_format to match citation style
+	# for each line, id_medium based on style, then use matching regex to extract fields
+	# create a collection of the fields, 
+	# then if any are missing, or "and others" is triggered for authors, attempt to retreive using crossref api
+	# (if crossref fails, warn that a fix should be attempted later)
+	# push refs of each collection to a new bibliography array as they are created
+	# create a new file in raw dir, and print each collection to the file in a "raw" formatted line
 # id_medium to determine which pattern has matched
+	# once style has been established, attempt to match against various patterns, and record the medium as "type" in raw field
 
 # FORMAT RAW AS STYLE
 # raw_to_fmt
+	# use regex to parse the raw file and reacquire fields
+	# then based on type, insert raw info into formatter string
 
 
 
@@ -162,4 +179,8 @@ sub find_rawfile {
 # where [] is a single field, and {} can be multiple
 
 
+
+
+# ORDERING ? Some reference lists are ordered alphabetically while others are dependent upon their order of appearance in manuscript
+# May need to expand the program to accomodate entire manuscript, and change in-text references as well
 
