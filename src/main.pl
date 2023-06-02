@@ -8,6 +8,7 @@ use lib dirname($0);
 use Test;
 use Help;
 
+use RAW;
 use MLA;
 
 my $version = "version 0.1 2023";
@@ -84,11 +85,13 @@ sub run_command {
 
 
 sub convert {
-	my ($file, $new) = @_;
-	if (my $filename = find_filename($file)) {
-		if (check_style() == 1) {
-			my $style = $style[0];
-			print "Convert $filename to $style"; if ($new) { print " and save as $new.rtf"; } print "\n";
+	my ($filename, $new) = @_;
+	if (my $file = find_filename($filename)) {
+		if (check_style($file) == 1) {
+			my $new_fmt = $style[0];
+			my $fmt = id_fmt($file);
+			print "$filename format is $fmt\n";
+			print "Convert $filename to $new_fmt"; if ($new) { print " and save as $new.rtf"; } print "\n";
 		} elsif (check_style() == 0) {
 			print "Convert $filename to raw"; if ($new) { print " and save as $new.raw.txt"; } print "\n";
 		}
@@ -96,11 +99,11 @@ sub convert {
 }
 
 sub export {
-	my ($raw, $new) = @_;
-	if (my $rawfile = find_rawfile($raw)) {
+	my ($rawfile, $new) = @_;
+	if (my $file = find_rawfile($rawfile)) {
 		if (check_style() == 1) {
-			my $style = $style[0]; 
-			print "Convert $raw to $style"; if ($new) { print " and save as $new.rtf"; } print "\n";
+			my $new_fmt = $style[0]; 
+			print "Convert $rawfile to $new_fmt"; if ($new) { print " and save as $new.rtf"; } print "\n";
 		} elsif (check_style() == 0) { print "Cannot export as raw. Please provide a CITATION_STYLE flag.\n"; }
 	}
 }
@@ -140,23 +143,40 @@ sub find_rawfile {
 	} else { print "ERROR: $raw could not be found.\n"; exit }
 }
 
-# FILE HANDLER SUBS
-# read_filename
-# new_filename
-# read_rawfile
-# new_rawfile
 
 # IDENTIFY FORMAT TYPE or PARSE USING REGEX FROM UNKNOWN FORMATTING
-# id_format
-	# look at the first citation with an author to narrow down the formats
-	# then find (a website? a book?) a landmark citation with distinctive elements to attempt to match patterns for those styles
-	# if none match, warn, then attempt brute parse
+sub id_fmt {
+	my ($file) = @_;
+	open my $fh, '<', $file or die "Unable to open file.";
+	while (my $line = <$fh>) {
+		while ($line =~ $MLA::book_citation_pattern ||
+		$line =~ $MLA::journal_citation_pattern || 
+		$line =~ $MLA::magazine_citation_pattern || 
+		$line =~ $MLA::website_citation_pattern || 
+		$line =~ $MLA::thesis_citation_pattern || 
+		$line =~ $MLA::newspaper_citation_pattern || 
+		$line =~ $MLA::conference_citation_pattern ) { return "MLA";}
+	# ADD OTHER CITATION STYLES HERE
+	}
+	close $fh;
+	return "Unknown format";
+} # Needs a way to identify the presence of lines that don't match? Or can that be handled at the line level?
+# May need to detect early to prevent files from being corrupted by incorrect parsing
+# Or is it OK to do the quick identify?
+
 # brute_parse 
 	# using flexible regex pattern, attempt to locate elements from the citation according to generics
 	# use crossref api to identify medium type
 
 # CONVERT TO RAW BIBLIOGRAPHY
 # fmt_to_raw
+sub fmt_to_raw {
+	my ($file) = @_;
+	my $fmt = id_fmt($file);
+	open my file $fh, '<', $file or die "Unable to read file.";
+
+
+}
 	# open file (read)
 	# id_format to match citation style
 	# for each line, id_medium based on style, then use matching regex to extract fields
@@ -165,21 +185,25 @@ sub find_rawfile {
 	# (if crossref fails, warn that a fix should be attempted later)
 	# push refs of each collection to a new bibliography array as they are created
 	# create a new file in raw dir, and print each collection to the file in a "raw" formatted line
+
 # id_medium to determine which pattern has matched
 	# once style has been established, attempt to match against various patterns, and record the medium as "type" in raw field
+
 
 # FORMAT RAW AS STYLE
 # raw_to_fmt
 	# use regex to parse the raw file and reacquire fields
 	# then based on type, insert raw info into formatter string
+sub raw_to_fmt {
+	my ($file) = @_;
+	open my $fh, '>', $file or die "Unable to edit file.";	
+}
 
 
 
 
 # Raw file formatting:
-# Type: [] Authors: {} Title: [] Publication: [] Institution: [] Date: [] Pages: [] 
-# where [] is a single field, and {} can be multiple
-
+# Type: [] Authors: {} Title: [] Publication: [] Institution: [] Location: [] Date: [] Pages: [] 
 
 
 
