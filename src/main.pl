@@ -149,7 +149,7 @@ sub id_fmt {
 	my ($file) = @_;
 	open my $fh, '<', $file or die "Unable to open file.";
 	while (my $line = <$fh>) {
-		while ($line =~ $MLA::book_citation_pattern ||
+		if ($line =~ $MLA::book_citation_pattern ||
 		$line =~ $MLA::journal_citation_pattern || 
 		$line =~ $MLA::magazine_citation_pattern || 
 		$line =~ $MLA::website_citation_pattern || 
@@ -160,34 +160,125 @@ sub id_fmt {
 	}
 	close $fh;
 	return "Unknown format";
-} # Needs a way to identify the presence of lines that don't match? Or can that be handled at the line level?
-# May need to detect early to prevent files from being corrupted by incorrect parsing
-# Or is it OK to do the quick identify?
+} # NEEDS DEBUGGING!
 
 # brute_parse 
 	# using flexible regex pattern, attempt to locate elements from the citation according to generics
 	# use crossref api to identify medium type
 
 # CONVERT TO RAW BIBLIOGRAPHY
-# fmt_to_raw
-sub fmt_to_raw {
+
+sub get_filename {
 	my ($file) = @_;
-	my $fmt = id_fmt($file);
-	open my file $fh, '<', $file or die "Unable to read file.";
+	my $filename_pattern = qr{/?(?<filename>[\.\p{L}\p{Nd}]+)\.rtf$};
+	my $filename;
+	if ($file =~ $filename_pattern) {
+		$filename = $+{filename};
+	}
+} # TEST ME!
 
-
-}
-	# open file (read)
-	# id_format to match citation style
+# fmt_to_raw
 	# for each line, id_medium based on style, then use matching regex to extract fields
 	# create a collection of the fields, 
 	# then if any are missing, or "and others" is triggered for authors, attempt to retreive using crossref api
 	# (if crossref fails, warn that a fix should be attempted later)
 	# push refs of each collection to a new bibliography array as they are created
 	# create a new file in raw dir, and print each collection to the file in a "raw" formatted line
+sub fmt_to_raw {
+	my ($file, $rawname) = @_;
+	my $fmt = id_fmt($file);
 
-# id_medium to determine which pattern has matched
-	# once style has been established, attempt to match against various patterns, and record the medium as "type" in raw field
+	my $rawfile;
+	if ($rawname) {	
+		$rawfile = $rawname;
+	} else {
+		$rawfile = get_filename($file);
+	}
+	my $raw = "$raw_dir"."$rawfile.raw.txt";
+
+	if (-e "$raw") {
+		print "$raw already exists, overwrite? (y/N) "; 
+		my $response = <STDIN>;
+		if ($response !~ /^y\n$|^Y\n$/) {
+			print "Enter new bibliography name: ";
+			my $newname = <STDIN>;
+			$raw = "$raw_dir"."$newname.raw.txt";
+			# IF RAW STILL EXISTS, REDO THE LOOP
+		}
+	}
+
+	open my $rf, '>', $raw or die "Unable to create rawfile: $!\n"; # NEEDS TO PASS ERROR, DOES "$!" APPLY ?
+	close $rf;
+	
+	if (open my $fh, '<', $file) {
+		while (my $line = <$fh>) {
+			my $raw_info = pull_raw_info($line, $fmt);
+			open my $rf, '>>', $raw;
+			print $rf $raw_info;
+		}
+		close $fh;
+		return 0;
+	} else {
+		print "ERROR: Failed to read $file\n";
+		return 0;
+	}	
+
+
+}
+
+
+# Raw file formatting:
+# Type: [] Authors: {} Title: [] Publication: [] Institution: [] Location: [] Date: [] Pages: [] 
+sub pull_raw_info {
+	my ($line, $fmt) = @_;
+	my $medium = id_medium($line, $fmt);
+	my @authors; my $title; my $publication; my $institution; my $location; my $date; my $pages;
+
+	if ($fmt eq "MLA") {
+		if ($line =~ $MLA::book_citation_pattern) { 
+			@authors = $+{authors}; 
+			$title = $+{title};
+			$institution = $+{publisher};
+			$date = $+{year};
+			$pages = $+{pages};
+		}
+		elsif ($line =~ $MLA::journal_citation_pattern) { return "journal" }
+		elsif ($line =~ $MLA::magazine_citation_pattern) { return "magazine" } 
+		elsif ($line =~ $MLA::website_citation_pattern) { return "website" }
+		elsif ($line =~ $MLA::thesis_citation_pattern) { return "thesis" }
+		elsif ($line =~ $MLA::newspaper_citation_pattern) { return "newspaper" }
+		elsif ($line =~ $MLA::conference_citation_pattern) { return "conference" }
+	}
+	return "Type: [$medium]; Authors: [@authors]; Title: [$title]; Publication: [$publication]; Institution: [$institution]; Date: [$date]; Pages: [$pages];";
+} # TEST ME!
+my $test_pull_book_info = "Smith, John, and Doe, Jane. That Book With the Title. Some Moneygrubbers, 2023, pp. 69-420.";
+my $test_pull_journal_info = 'Smith, John, and Doe, Jane. "The Article Title." Some Journal, vol. 1, no. 1, 2023, pp. 1-100.';
+print pull_raw_info($test_pull_book_info, "MLA");
+
+sub id_medium {
+	my ($line, $fmt) = @_;
+	if ($fmt eq "MLA") {
+		if ($line =~ $MLA::book_citation_pattern) { return "book" }
+		elsif ($line =~ $MLA::journal_citation_pattern) { return "journal" }
+		elsif ($line =~ $MLA::magazine_citation_pattern) { return "magazine" } 
+		elsif ($line =~ $MLA::website_citation_pattern) { return "website" }
+		elsif ($line =~ $MLA::thesis_citation_pattern) { return "thesis" }
+		elsif ($line =~ $MLA::newspaper_citation_pattern) { return "newspaper" }
+		elsif ($line =~ $MLA::conference_citation_pattern) { return "conference" }
+		else { 
+			print qq{WARNING: "$line" could not be parsed\n};
+			return "unknown" 
+		}	
+	}
+	elsif ($fmt eq "RAW") {
+		# PATTERN MATCHING FOR RAW	
+	}
+	else { print "ERROR: Style not recognized.\n" }
+}
+
+
+
+
 
 
 # FORMAT RAW AS STYLE
@@ -201,9 +292,6 @@ sub raw_to_fmt {
 
 
 
-
-# Raw file formatting:
-# Type: [] Authors: {} Title: [] Publication: [] Institution: [] Location: [] Date: [] Pages: [] 
 
 
 
