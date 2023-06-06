@@ -236,7 +236,7 @@ sub pull_raw_info {
 
 	if ($fmt eq "MLA") {
 		if ($line =~ $MLA::book_citation_pattern) { 
-			@authors = $+{authors}; 
+			@authors = $+{authors}; # NEED TO PARSE AUTHORS INTO ARRAY OF AUTHORS & GET MISSING INFO
 			$title = $+{title};
 			$institution = $+{publisher};
 			$date = $+{year};
@@ -249,6 +249,7 @@ sub pull_raw_info {
 		elsif ($line =~ $MLA::newspaper_citation_pattern) { return "newspaper" }
 		elsif ($line =~ $MLA::conference_citation_pattern) { return "conference" }
 	}
+	# GET MISSING INFO
 	return "Type: [$medium]; Authors: [@authors]; Title: [$title]; Publication: [$publication]; Institution: [$institution]; Date: [$date]; Pages: [$pages];";
 } # TEST ME!
 my $test_pull_book_info = "Smith, John, and Doe, Jane. That Book With the Title. Some Moneygrubbers, 2023, pp. 69-420.";
