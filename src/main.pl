@@ -112,9 +112,9 @@ sub export {
 sub find_filename {
 	my ($filename) = @_;
 	if ($filename =~ /\.rtf$/) {
-		my $cwd = getcwd();
-		if (-e "$cwd/$filename") {
-			my $file = "$cwd"."$filename";
+		my $cwd = getcwd()."/";
+		if (-e "$cwd$filename") {
+			my $file = "$cwd$filename";
 			print "$filename found in $cwd\n";
 			return $file
 		}
@@ -124,8 +124,8 @@ sub find_filename {
 			if ($response =~ /^y\n$|^Y\n$|^\n$/) { return $filename }
 			else { print "ERROR: $filename could not be located.\n"; exit }
 		}
-		elsif (-e "$save_dir/$filename") {
-			my $file = "$save_dir"."$filename";
+		elsif (-e "$save_dir$filename") {
+			my $file = "$save_dir$filename";
 			print "$filename found in bibliographer save directory. Use it? (Y/n) ";
 			my $response = <STDIN>;
 			if ($response =~ /^y\n$|^Y\n$|^\n$/) { return $file }
@@ -136,7 +136,7 @@ sub find_filename {
 
 sub find_rawfile {
 	my ($rawfile) = @_;
-	my $raw = "$raw_dir"."$rawfile.raw.txt";
+	my $raw = "$raw_dir$rawfile.raw.txt";
 	if (-e "$raw") {
 		print "$rawfile found.\n";
 		return $raw
@@ -196,15 +196,15 @@ sub fmt_to_raw {
 	}
 	my $raw = "$raw_dir"."$rawfile.raw.txt";
 
-	if (-e "$raw") {
+	while (-e "$raw") {
 		print "$raw already exists, overwrite? (y/N) "; 
 		my $response = <STDIN>;
 		if ($response !~ /^y\n$|^Y\n$/) {
 			print "Enter new bibliography name: ";
 			my $newname = <STDIN>;
-			$raw = "$raw_dir"."$newname.raw.txt";
-			# IF RAW STILL EXISTS, REDO THE LOOP
-		}
+			chomp $newname;
+			$raw = "$raw_dir$newname.raw.txt";
+		} else { last; }
 	}
 
 	open my $rf, '>', $raw or die "Unable to create rawfile: $!\n"; # NEEDS TO PASS ERROR, DOES "$!" APPLY ?
@@ -224,7 +224,7 @@ sub fmt_to_raw {
 	}	
 
 
-}
+} # TEST ME!
 
 
 # Raw file formatting:
@@ -256,6 +256,9 @@ my $test_pull_book_info = "Smith, John, and Doe, Jane. That Book With the Title.
 my $test_pull_journal_info = 'Smith, John, and Doe, Jane. "The Article Title." Some Journal, vol. 1, no. 1, 2023, pp. 1-100.';
 print pull_raw_info($test_pull_book_info, "MLA");
 
+
+
+
 sub id_medium {
 	my ($line, $fmt) = @_;
 	if ($fmt eq "MLA") {
@@ -274,6 +277,7 @@ sub id_medium {
 	elsif ($fmt eq "RAW") {
 		# PATTERN MATCHING FOR RAW	
 	}
+	# OTHER CITATION STYLES HERE
 	else { print "ERROR: Style not recognized.\n" }
 }
 
