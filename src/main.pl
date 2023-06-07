@@ -80,12 +80,10 @@ sub run_command {
 sub convert {
 	my ($filename, $new) = @_;
 	if (my $file = &File::find_filename($filename)) {
-		if (check_style($file) == 1) {
+		if (&check_style == 1) {
 			my $new_fmt = $style[0];
-			my $fmt = id_fmt($file);
-			print "$filename format is $fmt\n";
 			print "Convert $filename to $new_fmt"; if ($new) { print " and save as $new.rtf"; } print "\n";
-		} elsif (check_style() == 0) {
+		} elsif (&check_style == 0) {
 			print "Convert $filename to raw"; if ($new) { print " and save as $new.raw.txt"; } print "\n";
 		}
 	}
@@ -94,10 +92,10 @@ sub convert {
 sub export {
 	my ($rawfile, $new) = @_;
 	if (my $file = &File::find_rawfile($rawfile)) {
-		if (check_style() == 1) {
+		if (&check_style == 1) {
 			my $new_fmt = $style[0]; 
 			print "Convert $rawfile to $new_fmt"; if ($new) { print " and save as $new.rtf"; } print "\n";
-		} elsif (check_style() == 0) { print "Cannot export as raw. Please provide a CITATION_STYLE flag.\n"; }
+		} elsif (&check_style == 0) { print "Cannot export as raw. Please provide a CITATION_STYLE flag.\n"; }
 	}
 }
 
@@ -151,12 +149,13 @@ sub pull_raw_info {
 	# CONSULT STYLE GUIDES TO DETERMINE WHAT FIELDS ARE REQUIRED FOR EACH TYPE OF MEDIUM
 
 	if ($line =~ $MLA::book_citation_pattern) { 
-		$medium = "Book";
 		$authors = &MLA::pull_authors($+{authors});
 		$title = $+{title}; 	# TITLE NEEDS TO STRIP BOUNDARY QUOTES AND ITALICS, AND FULL STOP BEFORE PASSING AS RAW
-		$institution = $+{publisher};
+		my $publisher = $+{publisher};
 		$date = $+{year};
 		$pages = $+{pages};
+		# NEED TO DO THEM ONE BY ONE, IN CASE THERE ARE MISSING FIELDS, THEN COMBINE THEM INTO A STRING TO RETURN
+		return "Type: [Book]; Authors: {$authors}; Title: [$title]; Publisher: [$publisher]; Date: [$date]; Pages: [$pages];";
 	}
 	elsif ($line =~ $MLA::journal_citation_pattern) { 
 		$medium = "Journal";
@@ -217,7 +216,7 @@ sub pull_raw_info {
 } # TEST ME!
 my $test_pull_book_info = "Smith, John, and Doe, Jane. That Book With the Title. Some Moneygrubbers, 2023, pp. 69-420.";
 my $test_pull_journal_info = 'Smith, John, and Doe, Jane. "The Article Title." Some Journal, vol. 1, no. 1, 2023, pp. 1-100.';
-print pull_raw_info($test_pull_journal_info);
+print pull_raw_info($test_pull_book_info);
 
 
 
