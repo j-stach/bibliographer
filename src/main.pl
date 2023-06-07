@@ -5,6 +5,8 @@ use Getopt::Long;
 use File::Basename;
 use lib dirname($0);
 
+use File;
+
 use Test;
 use Help;
 
@@ -12,13 +14,6 @@ use RAW;
 use MLA;
 
 my $version = "version 0.1 2023";
-
-# Setup raw/save directory access
-my $dir = dirname($0);
-my $root = dirname($dir);
-my $raw_dir = $root.'/raw_bibs/';
-my $save_dir = $root.'/saved_bibs/';
-	
 
 my @style;
 sub style { my ($style) = @_; push @style, $style; }
@@ -40,9 +35,8 @@ GetOptions (
 	'help|h' => \$help,
 	'version|v'=> sub { print "$version\n" },
 
-	# VERBOSE / QUIET
-	# CONFIG (command?) or separate file, for holding configuration parameters and API keys
-	# FIX (command?) attempts to retrieve missing citation info
+	# VERBOSE 
+	# QUIET / QUICK
 	# STRICT will not export if all patterns cannot be identified and all information is not present
 
 	'MLA' => sub { &style("MLA") },
@@ -79,6 +73,8 @@ sub run_command {
 		else { print "ERROR: 'export' should have 1 or 2 arguments: @args found.\n"; }		
 	} else {
 		print "Command not recognized. Use --help to view available commands.\n";
+		# CONFIG (command?) or separate file, for holding configuration parameters and API keys
+		# FIX (command?) attempts to retrieve missing citation info
 	}
 }
 
@@ -86,7 +82,7 @@ sub run_command {
 
 sub convert {
 	my ($filename, $new) = @_;
-	if (my $file = find_filename($filename)) {
+	if (my $file = &File::find_filename($filename)) {
 		if (check_style($file) == 1) {
 			my $new_fmt = $style[0];
 			my $fmt = id_fmt($file);
@@ -100,47 +96,12 @@ sub convert {
 
 sub export {
 	my ($rawfile, $new) = @_;
-	if (my $file = find_rawfile($rawfile)) {
+	if (my $file = &File::find_rawfile($rawfile)) {
 		if (check_style() == 1) {
 			my $new_fmt = $style[0]; 
 			print "Convert $rawfile to $new_fmt"; if ($new) { print " and save as $new.rtf"; } print "\n";
 		} elsif (check_style() == 0) { print "Cannot export as raw. Please provide a CITATION_STYLE flag.\n"; }
 	}
-}
-
-
-sub find_filename {
-	my ($filename) = @_;
-	if ($filename =~ /\.rtf$/) {
-		my $cwd = getcwd()."/";
-		if (-e "$cwd$filename") {
-			my $file = "$cwd$filename";
-			print "$filename found in $cwd\n";
-			return $file
-		}
-		elsif ($filename =~ "/" && (-e "$filename")) {
-			print "File path $filename found. Use it? (Y/n) ";
-			my $response = <STDIN>;
-			if ($response =~ /^y\n$|^Y\n$|^\n$/) { return $filename }
-			else { print "ERROR: $filename could not be located.\n"; exit }
-		}
-		elsif (-e "$save_dir$filename") {
-			my $file = "$save_dir$filename";
-			print "$filename found in bibliographer save directory. Use it? (Y/n) ";
-			my $response = <STDIN>;
-			if ($response =~ /^y\n$|^Y\n$|^\n$/) { return $file }
-			else { print "ERROR: $filename could not be located.\n"; exit }
-		} else { print "ERROR: $filename could not be located.\n"; exit }
-	} else { print "ERROR: File to be read ($filename) must have '.rtf' file extension.\n"; exit }
-}
-
-sub find_rawfile {
-	my ($rawfile) = @_;
-	my $raw = "$raw_dir$rawfile.raw.txt";
-	if (-e "$raw") {
-		print "$rawfile found.\n";
-		return $raw
-	} else { print "ERROR: $raw could not be found.\n"; exit }
 }
 
 
@@ -156,8 +117,8 @@ sub id_fmt {
 		$line =~ $MLA::thesis_citation_pattern || 
 		$line =~ $MLA::newspaper_citation_pattern || 
 		$line =~ $MLA::conference_citation_pattern ) { return "MLA";}
-	# ADD OTHER CITATION STYLES HERE
 	}
+	# ADD OTHER CITATION STYLES HERE
 	close $fh;
 	return "Unknown format";
 } # NEEDS DEBUGGING!
@@ -166,16 +127,6 @@ sub id_fmt {
 	# using flexible regex pattern, attempt to locate elements from the citation according to generics
 	# use crossref api to identify medium type
 
-# CONVERT TO RAW BIBLIOGRAPHY
-
-sub get_filename {
-	my ($file) = @_;
-	my $filename_pattern = qr{/?(?<filename>[\.\p{L}\p{Nd}]+)\.rtf$};
-	my $filename;
-	if ($file =~ $filename_pattern) {
-		$filename = $+{filename};
-	}
-} # TEST ME!
 
 # fmt_to_raw
 	# for each line, id_medium based on style, then use matching regex to extract fields
@@ -192,9 +143,9 @@ sub fmt_to_raw {
 	if ($rawname) {	
 		$rawfile = $rawname;
 	} else {
-		$rawfile = get_filename($file);
+		$rawfile = &File::get_filename($file);
 	}
-	my $raw = "$raw_dir"."$rawfile.raw.txt";
+	my $raw = "$raw_dir$rawfile.raw.txt";
 
 	while (-e "$raw") {
 		print "$raw already exists, overwrite? (y/N) "; 
@@ -232,11 +183,11 @@ sub fmt_to_raw {
 sub pull_raw_info {
 	my ($line, $fmt) = @_;
 	my $medium = id_medium($line, $fmt);
-	my @authors; my $title; my $publication; my $institution; my $location; my $date; my $pages;
+	my $authors; my $title; my $publication; my $institution; my $location; my $date; my $pages;
 
 	if ($fmt eq "MLA") {
 		if ($line =~ $MLA::book_citation_pattern) { 
-			@authors = $+{authors}; # NEED TO PARSE AUTHORS INTO ARRAY OF AUTHORS & GET MISSING INFO
+			$authors = &MLA::pull_authors($+{authors});
 			$title = $+{title};
 			$institution = $+{publisher};
 			$date = $+{year};
@@ -250,13 +201,11 @@ sub pull_raw_info {
 		elsif ($line =~ $MLA::conference_citation_pattern) { return "conference" }
 	}
 	# GET MISSING INFO
-	return "Type: [$medium]; Authors: [@authors]; Title: [$title]; Publication: [$publication]; Institution: [$institution]; Date: [$date]; Pages: [$pages];";
+	return "Type: [$medium]; Authors: {$authors}; Title: [$title]; Publication: [$publication]; Institution: [$institution]; Date: [$date]; Pages: [$pages];";
 } # TEST ME!
 my $test_pull_book_info = "Smith, John, and Doe, Jane. That Book With the Title. Some Moneygrubbers, 2023, pp. 69-420.";
 my $test_pull_journal_info = 'Smith, John, and Doe, Jane. "The Article Title." Some Journal, vol. 1, no. 1, 2023, pp. 1-100.';
 print pull_raw_info($test_pull_book_info, "MLA");
-
-
 
 
 sub id_medium {

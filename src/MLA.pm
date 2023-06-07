@@ -8,100 +8,81 @@ our $VERSION = '0.10';
 our @EXPORT = qw($name_pattern $author_pattern $year_pattern $date_pattern $page_range_pattern $newspaper_page_range_pattern\
 $location_pattern $url_pattern $thesis_type_pattern $article_title_pattern $book_title_pattern $journal_name_pattern\
 $publisher_name_pattern $website_name_pattern $institution_name_pattern $journal_citation_pattern $book_citation_pattern\
-$newspaper_citation_pattern $magazine_citation_pattern $website_citation_pattern $conference_citation_pattern $thesis_citation_pattern);
+$newspaper_citation_pattern $magazine_citation_pattern $website_citation_pattern $conference_citation_pattern $thesis_citation_pattern\
+pull_authors);
 
-
-# -- Name
 our $name_pattern = qr/(?<family>\pL[\pL'\p{Pd}\s]*),\s+(?<first>(\p{Lu}\.\s?)+|(\p{Lu}[\pL'\p{Pd}]*))/;
-#test_name_pattern();
-
-# -- Author
 our $author_pattern = qr/(?<primary>$name_pattern)(,\sand\s(?<secondary>$name_pattern)|(?<others>\set\sal))?/;
-#test_author_pattern();
-
-# -- Year
 our $year_pattern = qr/(\p{Nd}{4})/;
-#test_year_pattern();
-
-# -- Date
 our $date_pattern = qr/((?<day>\p{Nd}{1,2}(-\p{Nd}{1,2})?)\s)?(?<month>\p{Lu}[\p{Ll}]*\.?)\s(?<year>$year_pattern)/;
-#test_date_pattern();
-
-# -- Page Range
 our $page_range_pattern = qr/pp\. (?<start>\p{Nd}+)(\p{Pd}(?<end>\p{Nd}+))?/;
-#test_page_range_pattern();
-
-# -- Newspaper Page Range
 our $newspaper_page_range_pattern = qr/p\. (?<start>\p{Lu}\p{Nd}+)(\p{Pd}(?<end>\p{Lu}\p{Nd}+))?/;
-
-# -- Location
 our $location_pattern = qr/(((\p{Lu}[\p{L}'\p{Pd}]*)+(,\s+)?)+)/;
-#test_location_pattern();
-
-# -- URL
 our $url_pattern = qr/(http(s)?:\/\/)?([\p{Nd}\p{L}]+\.[\p{L}\p{Nd}\p{Pd}_]+\.[\p{L}\p{Nd}]+(\/[\p{L}\p{Nd}\p{Pd}&\+\?=_']*)*)/;
-#test_url_pattern();
-
-# -- Thesis Type
 our $thesis_type_pattern = qr/[\p{L}\.'\s]+/;
-
-# -- Article Title
 our $article_title_pattern = qr/"((?:[^"]|"")*\p{Po}+)"/;
-#test_article_title_pattern();
-
-# -- Book Title
 our $book_title_pattern = qr/((\p{Lu}[\p{Lu}\p{Ll}\p{Pd}']*)\s?(((\p{Lu}[\p{Lu}\p{Ll}\p{Pd}']*)|([\p{Ll}\p{Pd}'\p{N}]*))\s?)*)+/;
-#test_book_title_pattern();
-
-# -- Journal Name
 our $journal_name_pattern = qr/\b(\p{Lu}[\pL\p{Pd}&'\.\s]*(, vol\. \p{Nd}+, no\. \p{Nd}+)?)/;
-#test_journal_name_pattern();
-
-# -- Publisher Name
 our $publisher_name_pattern = qr/(((\p{Lu}[\pL\p{Pd}'\.]*)+(,??\s)??)+)/;
-#test_publisher_name_pattern();
-
-# -- Website Name
 our $website_name_pattern = qr/(([\p{L}\p{Nd}\p{Pd}_']+([\.,\s]*?)*)*)/;
-#test_website_name_pattern();
-
-# -- Institution Name
 our $institution_name_pattern = qr/(((\p{Lu}|\p{Ll})[\p{Ll}\p{Pd}'\.]*(,??\s)?)+)/;
-#test_institution_name_pattern();
 
-# -- Journal Citation Format
 our $journal_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$article_title_pattern)\s+(?<journal>$journal_name_pattern),\s+(?<year>$year_pattern),\s+(?<pages>$page_range_pattern)\./;
-#test_journal_citation_pattern();
 
-# -- Book Citation Format
 our $book_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$book_title_pattern)\.\s+(?<publisher>$publisher_name_pattern),\s+(?<year>$year_pattern)(,\s+(?<pages>$page_range_pattern))?\./;
-#test_book_citation_pattern();
 
-# -- Newspaper Article Citation Format
 our $newspaper_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<newspaper>$publisher_name_pattern),\s+(?<date>$date_pattern),\s+(?<pages>$newspaper_page_range_pattern)\./;
-#test_newspaper_citation_pattern();
 
-# -- Magazine Article Citation Format
 our $magazine_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<magazine>$publisher_name_pattern),\s+((?<issue>vol\.\s\p{Nd}+,\sno\.\s\p{Nd}+),\s+)?(?<date>$date_pattern),\s+(?<pages>$page_range_pattern)\./;
-#test_magazine_citation_pattern();
 
-# -- Website Citation Format
 our $website_citation_pattern = qr/((?<authors>$author_pattern)\.\s+)?(?<title>$article_title_pattern)\s+(?<website>$website_name_pattern)(,\s+(?<publisher>$publisher_name_pattern))?,\s+(?<date>$date_pattern),\s+(?<url>$url_pattern)(\.\s+Accessed\s(?<retrieval_date>$date_pattern))?\./;
-#test_website_citation_pattern();
 
-# -- Conference Paper Citation Format
 our $conference_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$article_title_pattern)\s+(?<conference>$institution_name_pattern),\s+(?<dates>$date_pattern),\s+(?<location>$location_pattern)\./;
-#test_conference_citation_pattern();
 
-# -- Dissertation/Thesis Citation Format
 our $thesis_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$article_title_pattern)\s+(?<type>$thesis_type_pattern),\s+(?<institution>$institution_name_pattern),\s+(?<year>$year_pattern)\./;
-#test_thesis_citation_pattern();
+
+
+## MLA-specific subroutines 
+
+sub pull_authors {
+	my ($authors) = @_;
+	if ($authors =~ $MLA::author_pattern) {
+		my $author_1 = $+{primary};
+		my $author_2 = $+{secondary};
+		my $others = $+{others};
+		my @authors;
+		my $raw_authors;
+	       	if ($author_1 =~ $name_pattern) {
+			my $firstname = $+{first};
+			my $lastname = $+{family};
+			my $author = "[Given:($firstname) Family:($lastname)]";
+			push @authors, $author;
+		}
+		if ($author_2 =~ $name_pattern) {
+			my $firstname = $+{first};
+			my $lastname = $+{family};
+			my $author = "[Given:($firstname) Family:($lastname)]";
+			push @authors, $author;
+		} 
+		if ($others) {
+			my $author = "[and others]"; # SHOULD ATTEMPT TO GET MISSING AUTHORS
+			push @authors, $author;
+		} 
+		if (@authors) {
+			foreach my $author (@authors) {
+				$raw_authors .= $author;
+			}
+			return $raw_authors;
+		} else { return "[None]" }
+	} else { return "[None]" }
+}
+
+
 
 
 ## --- Test functions for MLA regex patterns -- ##
 
-## -- Test regex components
-
+# &test_name_pattern
 sub test_name_pattern {
 	my $test_name_1 = "Van Halen, Eddie";
 	my $test_name_2 = "von Neumann, Johannes";
@@ -121,6 +102,7 @@ sub test_name_pattern {
 	}
 }
 
+# &test_author_pattern
 sub test_author_pattern {
 	my $test_author_1 = "Lennon, John, and McCartney, Paul";
 	my $test_author_2 = "Crosby, David et al.";
@@ -152,6 +134,7 @@ sub test_author_pattern {
 	}
 }
 
+# &test_article_title_pattern
 sub test_article_title_pattern {
 	my $test_article_title_1 = '"Article Title."';
 	my $test_article_title_2 = '"Article (123 *** NH-) Title??"';
@@ -167,6 +150,7 @@ sub test_article_title_pattern {
 	}
 }
 
+# &test_book_title_pattern
 sub test_book_title_pattern {
 	my $test_title_1 = "Title of a Book";
 	my $test_title_2 = "N'N-Dimethyltryptamine";
@@ -183,6 +167,7 @@ sub test_book_title_pattern {
 	}
 }
 
+# &test_journal_name_pattern
 sub test_journal_name_pattern {
 	my $test_journal_name_1 = "Nature";
 	my $test_journal_name_2 = "Alzheimer's & Dementia";
@@ -200,6 +185,7 @@ sub test_journal_name_pattern {
 	}
 }
 
+# &test_publisher_name_pattern
 sub test_publisher_name_pattern {
 	my $test_publisher_1 = "Med. Sci. Pub."; 
 	my $test_publisher_2 = "Some Moneygrubbers' Company";
@@ -216,6 +202,7 @@ sub test_publisher_name_pattern {
 	}
 }
 
+# &test_website_name_pattern
 sub test_website_name_pattern {
 	my $test_website_1 = "Google";
 	my $test_website_2 = "sketchy-website";
@@ -232,6 +219,7 @@ sub test_website_name_pattern {
 	}
 }
 
+# &test_institution_name_pattern
 sub test_institution_name_pattern {
 	my $test_institution_1 = "University of Bullshit";
 	my $test_institution_2 = "Inst. Med. Sci.";
@@ -248,6 +236,7 @@ sub test_institution_name_pattern {
 	}
 }
 
+# &test_year_pattern
 sub test_year_pattern {
 	my $test_year_1 = "2023";
 	my $test_year_2 = "1776";
@@ -263,6 +252,7 @@ sub test_year_pattern {
 	}
 }
 
+# &test_date_pattern
 sub test_date_pattern {
 	my $test_date_1 = "4 July 1776";
 	my $test_date_2 = "5 Nov. 2008";
@@ -279,6 +269,7 @@ sub test_date_pattern {
 	}
 }
 
+# &test_page_range_pattern
 sub test_page_range_pattern {
 	my $test_range_1 = "pp. 1-100";
 	my $test_range_2 = "pp. 69-420";
@@ -296,6 +287,7 @@ sub test_page_range_pattern {
 	}
 }
 
+# &test_location_pattern
 sub test_location_pattern {
 	my $test_location_1 = "Birmingham, Alabama";
 	my $test_location_2 = "College Park, MD, USA";
@@ -312,6 +304,7 @@ sub test_location_pattern {
 	}
 }
 
+# &test_url_pattern
 sub test_url_pattern {
 	my $test_url_1 = "https://www.google.com/?search";
 	my $test_url_2 = "http://w3.sketchy-website.sus/?search=bla_bla_bla+bla_bla-4206969";
@@ -330,8 +323,7 @@ sub test_url_pattern {
 }
 
 
-## -- Test Citation Patterns
-
+# &test_journal_citation_pattern
 sub test_journal_citation_pattern {
 	my $test_citation_1 = 'Smith, John. "The Article Title." Some Journal, vol. 1, no. 1, 2023, pp. 1-100.';
 	my $test_citation_2 = 'Smith, John, and Doe, Jane. "The Article Title." Some Journal, vol. 1, no. 1, 2023, pp. 1-100.';
@@ -381,6 +373,7 @@ sub test_journal_citation_pattern {
 	}
 }
 
+# &test_book_citation_pattern
 sub test_book_citation_pattern {
 	my $test_book_1 = "Smith, John, and Doe, Jane. That Book With the Title. Some Moneygrubbers, 2023, pp. 69-420.";
 	my $test_book_2 = "Smith, John et al. N'N-Dimethyltryptamine. Med. Sci. Pub., 1999, pp. 1-100.";
@@ -402,6 +395,7 @@ sub test_book_citation_pattern {
 	}
 }
 
+# &test_newspaper_citation_pattern
 sub test_newspaper_citation_pattern {
 	my $test_newspaper_1 = 'Smith, John. "Headline--Catchy subtitle." Clickbait Rag, 1 January 2023, p. A1.';
 	my $test_newspaper_2 = 'Smith, John, and Doe, Jane. "We wrote this together!" Duet News, 20 March 1999, p. B2-C1.';
@@ -418,6 +412,7 @@ sub test_newspaper_citation_pattern {
 	}
 }
 
+# &test_magazine_citation_pattern
 sub test_magazine_citation_pattern {
 	my $test_magazine_1 = 'Doe, John. "Who Am I?" Philosophy Today, vol. 1, no. 21, 1 January 2001, pp. 1.';
 	my $test_magazine_2 = 'Smith, John, and Doe, Jane. "We wrote this together!" Duet Magazine, 23 March 2002, pp. 20-22.';
@@ -434,6 +429,7 @@ sub test_magazine_citation_pattern {
 	}
 }
 
+# &test_website_citation_pattern
 sub test_website_citation_pattern {
 	my $test_website_1 = q{"Webpage Title." Ye Olde Website, May 1999, www.old-website.com/webpage_title.};
 	my $test_website_2 = q{Smith, John. "John's Homepage." John's Homepage, Squarespace.com, 1 Jan 2023, www.johnspage.com/John's_Homepage.};
@@ -458,6 +454,7 @@ sub test_website_citation_pattern {
 	}
 }
 
+# &test_conference_citation_pattern
 sub test_conference_citation_pattern {
 	my $test_paper_1 = q{Smith, John. "A Presentation on a Thing." Conference of Thing-Studiers, 1-10 June 2023, London, UK.};
 	my $test_paper_2 = q{Smith, John. "Bla bla bla." Univeristy of Something I Guess, 3 March 2000, Boringland, Yawn.};
@@ -480,6 +477,7 @@ sub test_conference_citation_pattern {
 	}
 }
 
+# &test_thesis_citation_pattern
 sub test_thesis_citation_pattern {
 	my $test_thesis_1 = q{Smith, John. "My Theory About Something." PhD diss., University of Somewhere, 2001.};
 	my $test_thesis_2 = q{Doe, Jane. "A Summary of Stuff." Master's Thesis, National Things Institute, 2020.};

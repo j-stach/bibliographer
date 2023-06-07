@@ -8,16 +8,12 @@ use warnings;
 use File::Basename;
 use lib dirname($0);
 use MLA;
+use File;
 
 use Exporter 5.57 'import';
 our $VERSION = '0.10';
 our @EXPORT = qw(test);
 
-
-my $dir = dirname($0);
-my $root = dirname($dir);
-my $raw_dir = $root.'/raw_bibs/';
-my $save_dir = $root.'/saved_bibs/';
 
 sub test {
 	# Test the libs
