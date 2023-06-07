@@ -212,6 +212,7 @@ sub pull_raw_info {
 	}
 	# GET MISSING INFO IF ANY ARE EMPTY
 	# IF NO fmt IDENTIFIED, ATTEMPT TO MATCH USING GENERIC PATTERNS AND COMPLETE MISSING INFO
+	# if raw info can't be pulled, needs to abort with a warning and preserve the original string
 	return "Type: [$medium]; Authors: {$authors}; Title: [$title]; Publication: [$publication]; Institution: [$institution]; Date: [$date]; Pages: [$pages];";
 } # TEST ME!
 my $test_pull_book_info = "Smith, John, and Doe, Jane. That Book With the Title. Some Moneygrubbers, 2023, pp. 69-420.";
