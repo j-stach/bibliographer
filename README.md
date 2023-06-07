@@ -1,4 +1,6 @@
 # bibliographer
-CLI for creating and reformatting bibliographies for academic papers (WIP)
+CLI for reformatting bibliographies and references for academic papers
 
-After CLI program is complete, will create a webpage version to upload to personal site
+Work in-progress
+
+First version will focus on converting citations within bibliography-only files; once that is complete, will add full essay support with ordering and in-text citations
