@@ -100,8 +100,6 @@ sub export {
 }
 
 
-
-
 sub fmt_to_raw {
 	my ($file, $rawname) = @_;
 	my $rawfile;
@@ -137,90 +135,135 @@ sub fmt_to_raw {
 	}	
 } # TEST ME!
 
+sub build_citation {
+	my (@citation) = @_;
+	my $raw_citation;
+	foreach my $field (@citation) {
+		$raw_citation .= $field."; "
+	}
+	chop $raw_citation;
+	return $raw_citation;
+}
 
-# MOVE THIS SUPERFUNCTION INTO FORMAT MODULE
 sub pull_raw_info {
 	my ($line) = @_;
-	my $medium; my $authors; my $title; my $publication; my $institution; my $location; my $date; my $pages;
 
-	# MAY WANT TO INCLUDE OTHER VARIABLES THEN BUILD RAW CITATION FROM THERE, AFTER GETTING MISSING INFO
-	# OTHER VARIABLES TO INCLUDE, DOI, etc.
-	# DEFINE AND INITIALIZE WITHIN IF BLOCK? THEN PUSH TO CITATION VARIABLE AND BUILD STRING FROM THERE
 	# CONSULT STYLE GUIDES TO DETERMINE WHAT FIELDS ARE REQUIRED FOR EACH TYPE OF MEDIUM
+	# MLA::trim_title()
+	# Crossref::try_get_info() 
+	# missing_info() collects missing info into array and calls at end of function to query crossref api
+	# Crossref::try_get_web_info()
+	# &File::get_current_date
 
 	if ($line =~ $MLA::book_citation_pattern) { 
-		$authors = &MLA::pull_authors($+{authors});
-		$title = $+{title}; 	# TITLE NEEDS TO STRIP BOUNDARY QUOTES AND ITALICS, AND FULL STOP BEFORE PASSING AS RAW
-		my $publisher = $+{publisher};
-		$date = $+{year};
-		$pages = $+{pages};
-		# NEED TO DO THEM ONE BY ONE, IN CASE THERE ARE MISSING FIELDS, THEN COMBINE THEM INTO A STRING TO RETURN
-		return "Type: [Book]; Authors: {$authors}; Title: [$title]; Publisher: [$publisher]; Date: [$date]; Pages: [$pages];";
+		my @citation = ("Type: [Book]");
+		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
+			# else { try_get_info('authors') }
+		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
+			# else { try_get_info('title') }
+		if (my $publisher = $+{publisher}) { push @citation, "Publisher: [$publisher]" }
+			# else { try_get_info('publisher') }
+		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
+			# else { try_get_info('date') }
+		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
+		return build_citation(@citation);
 	}
 	elsif ($line =~ $MLA::journal_citation_pattern) { 
-		$medium = "Journal";
-		$authors = &MLA::pull_authors($+{authors});
-		$title = $+{title};
-		$publication = $+{journal};
-		$date = $+{year};
-		$pages = $+{pages};
+		my @citation = ("Type: [Journal]");
+		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
+			# else { try_get_info('authors') }
+		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
+			# else { try_get_info('title') }
+		if (my $journal = $+{journal}) { push @citation, "Journal: [$journal]" }
+			# else { try_get_info('journal') }
+		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
+			# else { try_get_info('date') }
+		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
+			# else { try_get_info('pages') }
+		return build_citation(@citation);
 	}
 	elsif ($line =~ $MLA::magazine_citation_pattern) { 
-		$medium = "Magazine";
-		$authors = &MLA::pull_authors($+{authors});
-		$title = $+{title};
-		$publication = $+{issue};
-		$institution = $+{magazine};
-		$date = $+{date};
-		$pages = $+{pages};
+		my @citation = ("Type: [Magazine]");
+		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
+			# else { try_get_info('authors') }
+		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
+			# else { try_get_info('title') }
+		if (my $magazine = $+{magazine}) { push @citation, "Magazine: [$magazine]" }
+			# else { try_get_info('magazine') }
+		if (my $issue = $+{issue}) { push @citation, "Issue: [$issue]" }
+			# else { try_get_info('issue') }
+		if (my $date = $+{date}) { push @citation, "Date: [$date]" }
+			# else { try_get_info('date') }
+		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
+			# else { try_get_info('pages') }
+		return build_citation(@citation);
 	} 
 	elsif ($line =~ $MLA::website_citation_pattern) { 
-		$medium = "Website";
-		$authors = &MLA::pull_authors($+{authors});
-		$title = $+{title};
-		$publication = $+{website};
-		$institution = $+{publisher};
-		$date = $+{date};
-		$pages = $+{url}." Accessed: ".$+{retrieval_date};
+		my @citation = ("Type: [Website]");
+		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
+			# else { try_get_web_info('authors') }
+		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
+			# else { try_get_web_info('title') }
+		if (my $website = $+{website}) { push @citation, "Website: [$website]" }
+			# else { try_get_web_info('website') }
+		if (my $publisher = $+{publisher}) { push @citation, "Publisher: [$publisher]" }
+			# else { try_get_web_info('publisher') }
+		if (my $date = $+{date}) { push @citation, "Date: [$date]" }
+			# else { try_get_web_info('date') }
+		if (my $url = $+{url}) { push @citation, "URL: [$url]" }
+		if (my $access_date = $+{retrieval_date}) { push @citation, "Accessed: [$access_date]" }
+			# else { &get_current_date }
+		return build_citation(@citation);
 	}
 	elsif ($line =~ $MLA::thesis_citation_pattern) { 
-		$medium = "Thesis";
-		$authors = &MLA::pull_authors($+{authors});
-		$title = $+{title};
-		$publication = $+{type};
-		$institution = $+{institution};
-		$date = $+{year};
-		$pages = $+{pages};
+		my @citation = ("Type: [Thesis]");
+		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
+			# else { try_get_info('authors') }
+		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
+			# else { try_get_info('title') }
+		if (my $thesis_type = $+{type}) { push @citation, "Thesis: [$thesis_type]"}
+			# else { try_get_info('thesis_type') }
+		if (my $institution = $+{institution}) { push @citation, "Institution: [$institution]"}
+			# else { try_get_info('institution') }
+		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
+			# else { try_get_info('date') }
+		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
+			# else { try_get_info('pages') }
+		return build_citation(@citation);
 	}
 	elsif ($line =~ $MLA::newspaper_citation_pattern) { 
-		$medium = "Newspaper";
-		$authors = &MLA::pull_authors($+{authors});
-		$title = $+{title};
-		$publication = $+{newspaper};
-		$date = $+{year};
-		$pages = $+{pages};
+		my @citation = ("Type: [Newspaper]");
+		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
+			# else { try_get_info('authors') }
+		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
+			# else { try_get_info('title') }
+		if (my $newspaper = $+{newspaper}) { push @citation, "Newspaper: [$newspaper]"}
+			# else { try_get_info('newspaper') }
+		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
+			# else { try_get_info('date') }
+		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
+			# else { try_get_info('pages') }
+		return build_citation(@citation);
 	}
 	elsif ($line =~ $MLA::conference_citation_pattern) { 
-		$medium = "Conference";
-		$authors = &MLA::pull_authors($+{authors});
-		$title = $+{title};
-		$publication = $+{conference};
-		$institution = $+{location};
-		$date = $+{dates};
-		$pages = $+{pages};
+		my @citation = ("Type: [Conference]");
+		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
+			# else { try_get_info('authors') }
+		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
+			# else { try_get_info('title') }
+		if (my $conference = $+{conference}) { push @citation, "Conference: [$conference]" }
+			# else { try_get_info('conference') }
+		if (my $location = $+{location}) { push @citation, "Location: [$location]" }
+			# else { try_get_info('location') }
+		if (my $date = $+{dates}) { push @citation, "Date: [$date]" }
+			# else { try_get_info('date') }
+		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
+			# else { try_get_info('pages') }
+		return build_citation(@citation);
 	}
-	# GET MISSING INFO IF ANY ARE EMPTY
 	# IF NO fmt IDENTIFIED, ATTEMPT TO MATCH USING GENERIC PATTERNS AND COMPLETE MISSING INFO
 	# if raw info can't be pulled, needs to abort with a warning and preserve the original string
-	return "Type: [$medium]; Authors: {$authors}; Title: [$title]; Publication: [$publication]; Institution: [$institution]; Date: [$date]; Pages: [$pages];";
-} # TEST ME!
-my $test_pull_book_info = "Smith, John, and Doe, Jane. That Book With the Title. Some Moneygrubbers, 2023, pp. 69-420.";
-my $test_pull_journal_info = 'Smith, John, and Doe, Jane. "The Article Title." Some Journal, vol. 1, no. 1, 2023, pp. 1-100.';
-print pull_raw_info($test_pull_book_info);
-
-
-
-
+}
 
 
 
