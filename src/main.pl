@@ -78,8 +78,6 @@ sub run_command {
 	}
 }
 
-
-
 sub convert {
 	my ($filename, $new) = @_;
 	if (my $file = &File::find_filename($filename)) {
@@ -105,7 +103,8 @@ sub export {
 }
 
 
-# IDENTIFY FORMAT TYPE or PARSE USING REGEX FROM UNKNOWN FORMATTING
+
+
 sub id_fmt {
 	my ($file) = @_;
 	open my $fh, '<', $file or die "Unable to open file.";
@@ -116,35 +115,42 @@ sub id_fmt {
 		$line =~ $MLA::website_citation_pattern || 
 		$line =~ $MLA::thesis_citation_pattern || 
 		$line =~ $MLA::newspaper_citation_pattern || 
-		$line =~ $MLA::conference_citation_pattern ) { return "MLA";}
+		$line =~ $MLA::conference_citation_pattern ) { return "MLA" }
 	}
 	# ADD OTHER CITATION STYLES HERE
 	close $fh;
 	return "Unknown format";
 } # NEEDS DEBUGGING!
 
-# brute_parse 
-	# using flexible regex pattern, attempt to locate elements from the citation according to generics
-	# use crossref api to identify medium type
+sub id_medium {
+	my ($line, $fmt) = @_;
+	if ($fmt eq "RAW") {
+		if ($line =~ qr{^Type: \[(?<type>.*?)\]}) { return $+{type} }
+	}
+	elsif ($fmt eq "MLA") {
+		if ($line =~ $MLA::book_citation_pattern) { return "book" }
+		elsif ($line =~ $MLA::journal_citation_pattern) { return "journal" }
+		elsif ($line =~ $MLA::magazine_citation_pattern) { return "magazine" } 
+		elsif ($line =~ $MLA::website_citation_pattern) { return "website" }
+		elsif ($line =~ $MLA::thesis_citation_pattern) { return "thesis" }
+		elsif ($line =~ $MLA::newspaper_citation_pattern) { return "newspaper" }
+		elsif ($line =~ $MLA::conference_citation_pattern) { return "conference" }
+		else { 
+			print qq{WARNING: "$line" could not be parsed\n};
+			return "unknown" 
+		}	
+	}
+	# ADD OTHER CITATION STYLES HERE
+	else { print "ERROR: Style not recognized.\n" }
+}
 
 
-# fmt_to_raw
-	# for each line, id_medium based on style, then use matching regex to extract fields
-	# create a collection of the fields, 
-	# then if any are missing, or "and others" is triggered for authors, attempt to retreive using crossref api
-	# (if crossref fails, warn that a fix should be attempted later)
-	# push refs of each collection to a new bibliography array as they are created
-	# create a new file in raw dir, and print each collection to the file in a "raw" formatted line
 sub fmt_to_raw {
 	my ($file, $rawname) = @_;
 	my $fmt = id_fmt($file);
-
 	my $rawfile;
-	if ($rawname) {	
-		$rawfile = $rawname;
-	} else {
-		$rawfile = &File::get_filename($file);
-	}
+
+	if ($rawname) {	$rawfile = $rawname; } else { $rawfile = &File::get_filename($file); }
 	my $raw = "$raw_dir$rawfile.raw.txt";
 
 	while (-e "$raw") {
@@ -158,7 +164,7 @@ sub fmt_to_raw {
 		} else { last; }
 	}
 
-	open my $rf, '>', $raw or die "Unable to create rawfile: $!\n"; # NEEDS TO PASS ERROR, DOES "$!" APPLY ?
+	open my $rf, '>', $raw or die "Unable to create rawfile: $!\n";
 	close $rf;
 	
 	if (open my $fh, '<', $file) {
@@ -168,22 +174,20 @@ sub fmt_to_raw {
 			print $rf $raw_info;
 		}
 		close $fh;
-		return 0;
+		return 1;
 	} else {
 		print "ERROR: Failed to read $file\n";
 		return 0;
 	}	
-
-
 } # TEST ME!
 
 
-# Raw file formatting:
-# Type: [] Authors: {} Title: [] Publication: [] Institution: [] Location: [] Date: [] Pages: [] 
 sub pull_raw_info {
 	my ($line, $fmt) = @_;
 	my $medium = id_medium($line, $fmt);
 	my $authors; my $title; my $publication; my $institution; my $location; my $date; my $pages;
+	# MAY WANT TO INCLUDE OTHER VARIABLES THEN BUILD RAW CITATION FROM THERE, AFTER GETTING MISSING INFO
+	# OTHER VARIABLES TO INCLUDE, DOI, etc.
 
 	if ($fmt eq "MLA") {
 		if ($line =~ $MLA::book_citation_pattern) { 
@@ -193,42 +197,61 @@ sub pull_raw_info {
 			$date = $+{year};
 			$pages = $+{pages};
 		}
-		elsif ($line =~ $MLA::journal_citation_pattern) { return "journal" }
-		elsif ($line =~ $MLA::magazine_citation_pattern) { return "magazine" } 
-		elsif ($line =~ $MLA::website_citation_pattern) { return "website" }
-		elsif ($line =~ $MLA::thesis_citation_pattern) { return "thesis" }
-		elsif ($line =~ $MLA::newspaper_citation_pattern) { return "newspaper" }
-		elsif ($line =~ $MLA::conference_citation_pattern) { return "conference" }
+		elsif ($line =~ $MLA::journal_citation_pattern) { 
+			$authors = &MLA::pull_authors($+{authors});
+			$title = $+{title};
+			$publication = $+{journal};
+			$date = $+{year};
+			$pages = $+{pages};
+		}
+		elsif ($line =~ $MLA::magazine_citation_pattern) { 
+			$authors = &MLA::pull_authors($+{authors});
+			$title = $+{title};
+			$publication = $+{issue};
+			$institution = $+{magazine};
+			$date = $+{date};
+			$pages = $+{pages};
+		} 
+		elsif ($line =~ $MLA::website_citation_pattern) { 
+			$authors = &MLA::pull_authors($+{authors});
+			$title = $+{title};
+			$publication = $+{website};
+			$institution = $+{publisher};
+			$date = $+{date};
+			$pages = $+{url}." Accessed: ".$+{retrieval_date};
+	       	}
+		elsif ($line =~ $MLA::thesis_citation_pattern) { 
+			$authors = &MLA::pull_authors($+{authors});
+			$title = $+{title};
+			$publication = $+{type};
+			$institution = $+{institution};
+			$date = $+{year};
+			$pages = $+{pages};
+	       	}
+		elsif ($line =~ $MLA::newspaper_citation_pattern) { 
+			$authors = &MLA::pull_authors($+{authors});
+			$title = $+{title};
+			$publication = $+{newspaper};
+			$date = $+{year};
+			$pages = $+{pages};
+	       	}
+		elsif ($line =~ $MLA::conference_citation_pattern) { 
+			$authors = &MLA::pull_authors($+{authors});
+			$title = $+{title};
+			$publication = $+{conference};
+			$institution = $+{location};
+			$date = $+{dates};
+			$pages = $+{pages};
+	       	}
 	}
-	# GET MISSING INFO
+	# GET MISSING INFO IF ANY ARE EMPTY
+	# IF NO fmt IDENTIFIED, ATTEMPT TO MATCH USING GENERIC PATTERNS AND COMPLETE MISSING INFO
 	return "Type: [$medium]; Authors: {$authors}; Title: [$title]; Publication: [$publication]; Institution: [$institution]; Date: [$date]; Pages: [$pages];";
 } # TEST ME!
 my $test_pull_book_info = "Smith, John, and Doe, Jane. That Book With the Title. Some Moneygrubbers, 2023, pp. 69-420.";
 my $test_pull_journal_info = 'Smith, John, and Doe, Jane. "The Article Title." Some Journal, vol. 1, no. 1, 2023, pp. 1-100.';
-print pull_raw_info($test_pull_book_info, "MLA");
+print pull_raw_info($test_pull_journal_info, "MLA");
 
-
-sub id_medium {
-	my ($line, $fmt) = @_;
-	if ($fmt eq "MLA") {
-		if ($line =~ $MLA::book_citation_pattern) { return "book" }
-		elsif ($line =~ $MLA::journal_citation_pattern) { return "journal" }
-		elsif ($line =~ $MLA::magazine_citation_pattern) { return "magazine" } 
-		elsif ($line =~ $MLA::website_citation_pattern) { return "website" }
-		elsif ($line =~ $MLA::thesis_citation_pattern) { return "thesis" }
-		elsif ($line =~ $MLA::newspaper_citation_pattern) { return "newspaper" }
-		elsif ($line =~ $MLA::conference_citation_pattern) { return "conference" }
-		else { 
-			print qq{WARNING: "$line" could not be parsed\n};
-			return "unknown" 
-		}	
-	}
-	elsif ($fmt eq "RAW") {
-		# PATTERN MATCHING FOR RAW	
-	}
-	# OTHER CITATION STYLES HERE
-	else { print "ERROR: Style not recognized.\n" }
-}
 
 
 
@@ -252,3 +275,6 @@ sub raw_to_fmt {
 # ORDERING ? Some reference lists are ordered alphabetically while others are dependent upon their order of appearance in manuscript
 # May need to expand the program to accomodate entire manuscript, and change in-text references as well
 
+# RTF: Need to accomodate italics and bold in regex patterns
+
+# Consult manuals of style and generate regex for each major citation style
