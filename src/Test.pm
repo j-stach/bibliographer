@@ -22,6 +22,7 @@ sub test {
 	if ($msg =~ $MLA::name_pattern) {
 		print "$msg";
 	}
+	print "Today is: ".&File::get_current_date."\n";
 	
 	# Test the dirs
 	if (-d $save_dir && -d $raw_dir) {

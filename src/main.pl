@@ -153,29 +153,26 @@ sub pull_raw_info {
 	# Crossref::try_get_info() 
 	# missing_info() collects missing info into array and calls at end of function to query crossref api
 	# Crossref::try_get_web_info()
-	# &File::get_current_date
 
 	if ($line =~ $MLA::book_citation_pattern) { 
 		my @citation = ("Type: [Book]");
 		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
-			# else { try_get_info('authors') }
+			# else { missing_info('authors') }
 		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
-			# else { try_get_info('title') }
 		if (my $publisher = $+{publisher}) { push @citation, "Publisher: [$publisher]" }
-			# else { try_get_info('publisher') }
+			# else { missing_info('publisher') }
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
-			# else { try_get_info('date') }
+			# else { missing_info('date') }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
 		return build_citation(@citation);
 	}
 	elsif ($line =~ $MLA::journal_citation_pattern) { 
 		my @citation = ("Type: [Journal]");
 		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
-			# else { try_get_info('authors') }
+			# else { missing_info('authors') }
 		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
-			# else { try_get_info('title') }
 		if (my $journal = $+{journal}) { push @citation, "Journal: [$journal]" }
-			# else { try_get_info('journal') }
+			# else { missing_info('journal') }
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
 			# else { try_get_info('date') }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
@@ -212,7 +209,7 @@ sub pull_raw_info {
 			# else { try_get_web_info('date') }
 		if (my $url = $+{url}) { push @citation, "URL: [$url]" }
 		if (my $access_date = $+{retrieval_date}) { push @citation, "Accessed: [$access_date]" }
-			# else { &get_current_date }
+			else { push @citation, "Accessed: [".&File::get_current_date."]" }
 		return build_citation(@citation);
 	}
 	elsif ($line =~ $MLA::thesis_citation_pattern) { 

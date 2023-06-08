@@ -9,7 +9,7 @@ use lib dirname($0);
 
 use Exporter 5.57 'import';
 our $VERSION = '0.10';
-our @EXPORT = qw($raw_dir $save_dir find_filename find_rawfile get_filename);
+our @EXPORT = qw($raw_dir $save_dir find_filename find_rawfile get_filename get_current_date);
 
 # Setup raw/save directory access
 our $dir = dirname($0);
@@ -61,6 +61,12 @@ sub get_filename {
 	}
 } # TEST ME!
 
+sub get_current_date {
+	my ($sec, $min, $hour, $day, $mon, $year) = localtime();
+	$year += 1900;
+	my @months = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
+	my $month = $months[$mon];
+	return "$day $month $year";
+}
 
-
-
+1;
