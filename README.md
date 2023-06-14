@@ -1,4 +1,4 @@
-# bibliographer
+# bibliographer (WIP)
 CLI for reformatting bibliographies and references for academic papers
 
 Work in-progress
