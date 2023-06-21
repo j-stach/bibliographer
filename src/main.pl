@@ -135,7 +135,7 @@ sub fmt_to_raw {
 	}	
 } # TEST ME!
 
-sub build_citation {
+sub build_raw_citation {
 	my (@citation) = @_;
 	my $raw_citation;
 	foreach my $field (@citation) {
@@ -149,6 +149,10 @@ sub pull_raw_info {
 	my ($line) = @_;
 
 	# CONSULT STYLE GUIDES TO DETERMINE WHAT FIELDS ARE REQUIRED FOR EACH TYPE OF MEDIUM
+	# Consider using get_style() to determine the current format, then use:
+	# my $style;
+	# $line =~ ${$style."::pattern"}
+	# This could save a lot of code here
 
 	if ($line =~ $MLA::book_citation_pattern) { 
 		my @citation = ("Type: [Book]");
@@ -159,7 +163,7 @@ sub pull_raw_info {
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
 		# Finder::try_get_info() 
-		return build_citation(@citation);
+		return buildi_raw_citation(@citation);
 	}
 
 	elsif ($line =~ $MLA::journal_citation_pattern) { 
@@ -171,7 +175,7 @@ sub pull_raw_info {
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
 		# Finder::try_get_info() 
-		return build_citation(@citation);
+		return build_raw_citation(@citation);
 	}
 
 	elsif ($line =~ $MLA::magazine_citation_pattern) { 
@@ -184,7 +188,7 @@ sub pull_raw_info {
 		if (my $date = $+{date}) { push @citation, "Date: [$date]" }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
 		# Finder::try_get_info() 
-		return build_citation(@citation);
+		return build_raw_citation(@citation);
 	} 
 
 	elsif ($line =~ $MLA::website_citation_pattern) { 
@@ -199,7 +203,7 @@ sub pull_raw_info {
 		if (my $access_date = $+{retrieval_date}) { push @citation, "Accessed: [$access_date]" }
 			else { push @citation, "Accessed: [".&File::get_current_date."]" }
 		# Finder::try_get_web_info()
-		return build_citation(@citation);
+		return build_raw_citation(@citation);
 	}
 
 	elsif ($line =~ $MLA::thesis_citation_pattern) { 
@@ -212,7 +216,7 @@ sub pull_raw_info {
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
 		# Finder::try_get_info() 
-		return build_citation(@citation);
+		return build_raw_citation(@citation);
 	}
 
 	elsif ($line =~ $MLA::newspaper_citation_pattern) { 
@@ -224,7 +228,7 @@ sub pull_raw_info {
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
 		# Finder::try_get_info() 
-		return build_citation(@citation);
+		return build_raw_citation(@citation);
 	}
 
 	elsif ($line =~ $MLA::conference_citation_pattern) { 
@@ -237,15 +241,15 @@ sub pull_raw_info {
 		if (my $date = $+{dates}) { push @citation, "Date: [$date]" }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
 		# Finder::try_get_info() 
-		return build_citation(@citation);
+		return build_raw_citation(@citation);
 	}
 	# IF NO fmt IDENTIFIED, ATTEMPT TO MATCH USING GENERIC PATTERNS AND COMPLETE MISSING INFO
 	# if raw info can't be pulled, needs to abort with a warning and preserve the original string
 }
 
 
-sub raw_to_mla {
-	my ($file) = @_;
+sub raw_to_fmt {
+	my ($file, $style, $new) = @_;
 	open my $fh, '>', $file or die "Unable to edit file.";	
 	my @references;
 	while (my $line = <$fh>) {
@@ -270,36 +274,44 @@ sub raw_to_mla {
 			my $thesis; if ($line =~ qr{\bThesis: \[(?<thesis>.*?)\]}) { $thesis = $+{thesis} }
 			my $institution; if ($line =~ qr{\bInstitution: \[(?<institution>.*?)\]}) { $institution = $+{institution} }
 			my $location; if ($line =~ qr{\bLocation: \[(?<location>.*?)\]}) { $location = $+{location} }
+			my $conference; if ($line =~ qr{\bConference: \[(?<conference>.*?)\]}) { $conference = $+{conference} }
 			
 			my $date; if ($line =~ qr{\bDate: \[(?<date>.*?)\]}) { $date = $+{date} }
 			my $pages; if ($line =~ qr{\bPages: \[(?<pages>.*?)\]}) { $pages = $+{pages} }
 
 			if ($type =~ /Book/) {
+				if ($style == "MLA") { mla_book() }
 				# create string
 				# append fields to string in proper order and format
 			}
 
 			elsif ($type =~ /Journal/) {
+				if ($style == "MLA") {}
 			
 			}
 
 			elsif ($type =~ /Magazine/) {  
+				if ($style == "MLA") {}
 			
 			}
 
 			elsif ($type =~ /Website/) {
+				if ($style == "MLA") {}
 
 			}
 
 			elsif ($type =~ /Thesis/) {
+				if ($style == "MLA") {}
 
 			}
 
 			elsif ($type =~ /Newspaper/) {
+				if ($style == "MLA") {}
 			
 			}
 
 			elsif ($type =~ /Conference/) {
+				if ($style == "MLA") {}
 			
 			}
 
