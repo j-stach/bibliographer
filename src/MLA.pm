@@ -9,7 +9,7 @@ our @EXPORT = qw($name_pattern $author_pattern $year_pattern $date_pattern $page
 $location_pattern $url_pattern $thesis_type_pattern $article_title_pattern $book_title_pattern $journal_name_pattern\
 $publisher_name_pattern $website_name_pattern $institution_name_pattern $journal_citation_pattern $book_citation_pattern\
 $newspaper_citation_pattern $magazine_citation_pattern $website_citation_pattern $conference_citation_pattern $thesis_citation_pattern\
-pull_authors);
+pull_authors trim_title);
 
 our $name_pattern = qr/(?<family>\pL[\pL'\p{Pd}\s]*),\s+(?<first>(\p{Lu}\.\s?)+|(\p{Lu}[\pL'\p{Pd}]*))/;
 our $author_pattern = qr/(?<primary>$name_pattern)(,\sand\s(?<secondary>$name_pattern)|(?<others>\set\sal))?/;
@@ -77,6 +77,25 @@ sub pull_authors {
 	} else { return "[None]" }
 }
 
+sub trim_title {
+	my ($title) = @_;
+	if ($title =~ $article_title_pattern) {
+		return $1;
+	}
+	elsif ($title =~ $book_title_pattern) {
+		return $1;
+	}
+	else { die "Title $title is incorrectly formatted and could not be parsed." }
+	# NEEDS TO ACCOUNT FOR NON-PERIOD ENDING PUNCTUATION IN TITLE?
+}
+
+# sub new_book_citation {}
+# sub new_journal_citation {}
+# sub new_magazine_citation {}
+# sub new_website_citation {}
+# sub new_thesis_citation {}
+# sub new_newspaper_citation {}
+# sub new_conference_citation {}
 
 
 
