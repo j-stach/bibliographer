@@ -149,113 +149,94 @@ sub pull_raw_info {
 	my ($line) = @_;
 
 	# CONSULT STYLE GUIDES TO DETERMINE WHAT FIELDS ARE REQUIRED FOR EACH TYPE OF MEDIUM
-	# MLA::trim_title()
-	# Crossref::try_get_info() 
-	# missing_info() collects missing info into array and calls at end of function to query crossref api
-	# Crossref::try_get_web_info()
 
 	if ($line =~ $MLA::book_citation_pattern) { 
 		my @citation = ("Type: [Book]");
 		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
-			# else { missing_info('authors') }
 		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
+		# MLA::trim_title()
 		if (my $publisher = $+{publisher}) { push @citation, "Publisher: [$publisher]" }
-			# else { missing_info('publisher') }
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
-			# else { missing_info('date') }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
+		# Finder::try_get_info() 
 		return build_citation(@citation);
 	}
+
 	elsif ($line =~ $MLA::journal_citation_pattern) { 
 		my @citation = ("Type: [Journal]");
 		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
-			# else { missing_info('authors') }
 		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
+		# MLA::trim_title()
 		if (my $journal = $+{journal}) { push @citation, "Journal: [$journal]" }
-			# else { missing_info('journal') }
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
-			# else { try_get_info('date') }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
-			# else { try_get_info('pages') }
+		# Finder::try_get_info() 
 		return build_citation(@citation);
 	}
+
 	elsif ($line =~ $MLA::magazine_citation_pattern) { 
 		my @citation = ("Type: [Magazine]");
 		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
-			# else { try_get_info('authors') }
 		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
-			# else { try_get_info('title') }
+		# MLA::trim_title()
 		if (my $magazine = $+{magazine}) { push @citation, "Magazine: [$magazine]" }
-			# else { try_get_info('magazine') }
 		if (my $issue = $+{issue}) { push @citation, "Issue: [$issue]" }
-			# else { try_get_info('issue') }
 		if (my $date = $+{date}) { push @citation, "Date: [$date]" }
-			# else { try_get_info('date') }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
-			# else { try_get_info('pages') }
+		# Finder::try_get_info() 
 		return build_citation(@citation);
 	} 
+
 	elsif ($line =~ $MLA::website_citation_pattern) { 
 		my @citation = ("Type: [Website]");
 		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
-			# else { try_get_web_info('authors') }
 		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
-			# else { try_get_web_info('title') }
+		# MLA::trim_title()
 		if (my $website = $+{website}) { push @citation, "Website: [$website]" }
-			# else { try_get_web_info('website') }
 		if (my $publisher = $+{publisher}) { push @citation, "Publisher: [$publisher]" }
-			# else { try_get_web_info('publisher') }
 		if (my $date = $+{date}) { push @citation, "Date: [$date]" }
-			# else { try_get_web_info('date') }
 		if (my $url = $+{url}) { push @citation, "URL: [$url]" }
 		if (my $access_date = $+{retrieval_date}) { push @citation, "Accessed: [$access_date]" }
 			else { push @citation, "Accessed: [".&File::get_current_date."]" }
+		# Finder::try_get_web_info()
 		return build_citation(@citation);
 	}
+
 	elsif ($line =~ $MLA::thesis_citation_pattern) { 
 		my @citation = ("Type: [Thesis]");
 		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
-			# else { try_get_info('authors') }
 		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
-			# else { try_get_info('title') }
+		# MLA::trim_title()
 		if (my $thesis_type = $+{type}) { push @citation, "Thesis: [$thesis_type]"}
-			# else { try_get_info('thesis_type') }
 		if (my $institution = $+{institution}) { push @citation, "Institution: [$institution]"}
-			# else { try_get_info('institution') }
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
-			# else { try_get_info('date') }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
-			# else { try_get_info('pages') }
+		# Finder::try_get_info() 
 		return build_citation(@citation);
 	}
+
 	elsif ($line =~ $MLA::newspaper_citation_pattern) { 
 		my @citation = ("Type: [Newspaper]");
 		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
-			# else { try_get_info('authors') }
 		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
-			# else { try_get_info('title') }
+		# MLA::trim_title()
 		if (my $newspaper = $+{newspaper}) { push @citation, "Newspaper: [$newspaper]"}
-			# else { try_get_info('newspaper') }
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
-			# else { try_get_info('date') }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
-			# else { try_get_info('pages') }
+		# Finder::try_get_info() 
 		return build_citation(@citation);
 	}
+
 	elsif ($line =~ $MLA::conference_citation_pattern) { 
 		my @citation = ("Type: [Conference]");
 		if (my $authors = &MLA::pull_authors($+{authors})) { push @citation, "Authors: {$authors}" }
-			# else { try_get_info('authors') }
 		if (my $title = $+{title}) { push @citation, "Title: [$title]" }
-			# else { try_get_info('title') }
+		# MLA::trim_title()
 		if (my $conference = $+{conference}) { push @citation, "Conference: [$conference]" }
-			# else { try_get_info('conference') }
 		if (my $location = $+{location}) { push @citation, "Location: [$location]" }
-			# else { try_get_info('location') }
 		if (my $date = $+{dates}) { push @citation, "Date: [$date]" }
-			# else { try_get_info('date') }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
-			# else { try_get_info('pages') }
+		# Finder::try_get_info() 
 		return build_citation(@citation);
 	}
 	# IF NO fmt IDENTIFIED, ATTEMPT TO MATCH USING GENERIC PATTERNS AND COMPLETE MISSING INFO
@@ -263,21 +244,72 @@ sub pull_raw_info {
 }
 
 
-
-# FORMAT RAW AS STYLE
-# raw_to_fmt
-	# use regex to parse the raw file and reacquire fields
-	# then based on type, insert raw info into formatter string
-	# and push formatted string into array of strings
-	# then append the bibliography file with each line in the array
-	# for now, will not have ordering capability which will be left up to the user to organize
-sub raw_to_fmt {
+sub raw_to_mla {
 	my ($file) = @_;
 	open my $fh, '>', $file or die "Unable to edit file.";	
+	my @references;
 	while (my $line = <$fh>) {
-		my $type;
-		if ($line =~ qr{^Type: \[(?<type>.*?)\]}) { $type = $+{type} }
+		if ($line =~ qr{^Type: \[(?<type>.*?)\]}) { 
+			my $type = $+{type};
+			my $authors; if ($line =~ qr{\bAuthors: \{(?<authors>.*?)\}}) { $authors = $+{authors} }
+			my @authors; # get individual authors as a list
+			my $title; if ($line =~ qr{\bTitle: \[(?<title>.*?)\]}) { $title = $+{title} }
+
+			my $publisher; if ($line =~ qr{\bPublisher: \[(?<publisher>.*?)\]}) { $publisher = $+{publisher} } 
+			my $journal; if ($line =~ qr{\bJournal: \[(?<journal>.*?)\]}) { $journal = $+{journal} }
+			
+			my $magazine; if ($line =~ qr{\bMagazine: \[(?<magazine>.*?)\]}) { $magazine = $+{magazine} }
+			my $issue; if ($line =~ qr{\bIssue: \[(?<issue>.*?)\]}) { $issue = $+{issue} }
+			
+			my $website; if ($line =~ qr{\bWebsite: \[(?<website>.*?)\]}) { $website = $+{website} }
+			my $url; if ($line =~ qr{\bURL: \[(?<url>.*?)\]}) { $url = $+{url} }
+			my $access; if ($line =~ qr{\bAccessed: \[(?<access>.*?)\]}) { $access = $+{access} }
+
+			my $newspaper; if ($line =~ qr{\bNewspaper: \[(?<newspaper>.*?)\]}) { $newspaper = $+{newspaper} }
+
+			my $thesis; if ($line =~ qr{\bThesis: \[(?<thesis>.*?)\]}) { $thesis = $+{thesis} }
+			my $institution; if ($line =~ qr{\bInstitution: \[(?<institution>.*?)\]}) { $institution = $+{institution} }
+			my $location; if ($line =~ qr{\bLocation: \[(?<location>.*?)\]}) { $location = $+{location} }
+			
+			my $date; if ($line =~ qr{\bDate: \[(?<date>.*?)\]}) { $date = $+{date} }
+			my $pages; if ($line =~ qr{\bPages: \[(?<pages>.*?)\]}) { $pages = $+{pages} }
+
+			if ($type =~ /Book/) {
+				# create string
+				# append fields to string in proper order and format
+			}
+
+			elsif ($type =~ /Journal/) {
+			
+			}
+
+			elsif ($type =~ /Magazine/) {  
+			
+			}
+
+			elsif ($type =~ /Website/) {
+
+			}
+
+			elsif ($type =~ /Thesis/) {
+
+			}
+
+			elsif ($type =~ /Newspaper/) {
+			
+			}
+
+			elsif ($type =~ /Conference/) {
+			
+			}
+
+			else { die "Raw file corrupted. Type $type not recognized." }
+		}
+
+		# push to temp array @references, to make for easy ordering?
 	}
+	# reorder references according to parameters
+	# print each element of the array to a new line in the new file
 }
 
 
