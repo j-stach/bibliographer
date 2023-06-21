@@ -72,7 +72,7 @@ sub run_command {
 		} elsif (@args == 0) { print "ERROR: 'export' expected bibliography name argument.\n"; }
 		else { print "ERROR: 'export' should have 1 or 2 arguments: @args found.\n"; }		
 	} else {
-		print "Command not recognized. Use --help to view available commands.\n";
+		print "Command not recognized. Use --help or run without arguments to view available commands.\n";
 		# FIX (command?) attempts to retrieve missing citation info
 	}
 }
@@ -142,6 +142,7 @@ sub build_raw_citation {
 		$raw_citation .= $field."; "
 	}
 	chop $raw_citation;
+	$raw_citation .= "\n";
 	return $raw_citation;
 }
 
@@ -163,7 +164,7 @@ sub pull_raw_info {
 		if (my $date = $+{year}) { push @citation, "Date: [$date]" }
 		if (my $pages = $+{pages}) { push @citation, "Pages: [$pages]" }
 		# Finder::try_get_info() 
-		return buildi_raw_citation(@citation);
+		return build_raw_citation(@citation);
 	}
 
 	elsif ($line =~ $MLA::journal_citation_pattern) { 
@@ -243,8 +244,6 @@ sub pull_raw_info {
 		# Finder::try_get_info() 
 		return build_raw_citation(@citation);
 	}
-	# IF NO fmt IDENTIFIED, ATTEMPT TO MATCH USING GENERIC PATTERNS AND COMPLETE MISSING INFO
-	# if raw info can't be pulled, needs to abort with a warning and preserve the original string
 }
 
 
@@ -279,46 +278,40 @@ sub raw_to_fmt {
 			my $date; if ($line =~ qr{\bDate: \[(?<date>.*?)\]}) { $date = $+{date} }
 			my $pages; if ($line =~ qr{\bPages: \[(?<pages>.*?)\]}) { $pages = $+{pages} }
 
+
+			# CONSULT STYLE GUIDES TO DETERMINE WHAT FIELDS ARE REQUIRED FOR EACH TYPE OF MEDIUM
+	
 			if ($type =~ /Book/) {
-				if ($style == "MLA") { mla_book() }
-				# create string
-				# append fields to string in proper order and format
+				my $reference = eval $style.'::new_book_citation(@authors, $title)';
+				push @references, $reference;
 			}
-
 			elsif ($type =~ /Journal/) {
-				if ($style == "MLA") {}
-			
+				my $reference = eval $style.'::new_journal_citation(@authors, $title)';
+				push @references, $reference;
 			}
-
 			elsif ($type =~ /Magazine/) {  
-				if ($style == "MLA") {}
-			
+				my $reference = eval $style.'::new_magazine_citation(@authors, $title)';
+				push @references, $reference;
 			}
-
 			elsif ($type =~ /Website/) {
-				if ($style == "MLA") {}
-
+				my $reference = eval $style.'::new_website_citation(@authors, $title)';
+				push @references, $reference;
 			}
-
 			elsif ($type =~ /Thesis/) {
-				if ($style == "MLA") {}
-
+				my $reference = eval $style.'::new_thesis_citation(@authors, $title)';
+				push @references, $reference;
 			}
-
 			elsif ($type =~ /Newspaper/) {
-				if ($style == "MLA") {}
-			
+				my $reference = eval $style.'::new_newspaper_citation(@authors, $title)';
+				push @references, $reference;
 			}
-
 			elsif ($type =~ /Conference/) {
-				if ($style == "MLA") {}
-			
+				my $reference = eval $style.'::new_conference_citation(@authors, $title)';
+				push @references, $reference;
 			}
 
 			else { die "Raw file corrupted. Type $type not recognized." }
 		}
-
-		# push to temp array @references, to make for easy ordering?
 	}
 	# reorder references according to parameters
 	# print each element of the array to a new line in the new file
