@@ -3,13 +3,17 @@ package MLA;
 use strict;
 use warnings;
 
+use File::Basename;
+use lib dirname($0);
+use Fmt;
+
 use Exporter 5.57 'import';
 our $VERSION = '0.10';
 our @EXPORT = qw($name_pattern $author_pattern $year_pattern $date_pattern $page_range_pattern $newspaper_page_range_pattern\
 $location_pattern $url_pattern $thesis_type_pattern $article_title_pattern $book_title_pattern $journal_name_pattern\
 $publisher_name_pattern $website_name_pattern $institution_name_pattern $journal_citation_pattern $book_citation_pattern\
 $newspaper_citation_pattern $magazine_citation_pattern $website_citation_pattern $conference_citation_pattern $thesis_citation_pattern\
-pull_authors trim_title);
+pull_authors trim_title new_book_citation);
 
 our $name_pattern = qr/(?<family>\pL[\pL'\p{Pd}\s]*),\s+(?<first>(\p{Lu}\.\s?)+|(\p{Lu}[\pL'\p{Pd}]*))/;
 our $author_pattern = qr/(?<primary>$name_pattern)(,\sand\s(?<secondary>$name_pattern)|(?<others>\set\sal))?/;
@@ -89,7 +93,68 @@ sub trim_title {
 	# NEEDS TO ACCOUNT FOR NON-PERIOD ENDING PUNCTUATION IN TITLE?
 }
 
-# sub new_book_citation {}
+my $author_max = 2;
+sub new_author_list {
+	my (@authors) = @_;
+	my $author_list = "";
+	my $author_count = '0';
+	while (($author_count + 1) <= $author_max) {
+		if ($authors[$author_count] =~ $Fmt::author_name_pattern) {
+			my $given_name = $+{first};
+			my $family_name = $+{family};
+			my $styled_author;
+			if ($author_count == '0') {
+				$styled_author = "$family_name, $given_name";
+			} elsif ($author_count == '1' && scalar @authors < '3') {
+				$styled_author = ", and $family_name, $given_name";
+			} elsif ($author_count == '1' && scalar @authors >= '3') {
+				$styled_author = " et al";
+			} else { last }
+			$author_list .= $styled_author;
+		}
+		$author_count++;
+	}
+	$author_list .= ". ";
+	return $author_list
+}
+
+sub new_book_citation {
+	my (@authors, $title, $publisher, $date, $pages) = @_;
+	my $reference = "";
+	if (@authors) {
+		my $author_list = new_author_list(@authors);
+		$reference .= $author_list;
+	}
+	if ($title) {
+		$reference .= "$title. ";
+	} else {}
+	if ($publisher) {
+		$reference .= "$publisher, ";
+	}
+	if ($date) {
+		my $styled_date;
+		if ($date =~ $Fmt::year_pattern) {
+			$styled_date = $date;
+		} elsif ($date =~ $Fmt::date_pattern) {
+			$styled_date = $+{year};
+		} elsif ($date =~ $Fmt::date_range_pattern) {
+			my $start_date = $+{start};
+			if ($start_date =~ $Fmt::date_pattern) {
+				$styled_date = $+{year};
+			}
+		}
+		$reference .= "$styled_date, ";
+	}
+	if ($pages) {
+		$reference .= "pp. $pages."
+	}
+	if ($reference =~ /, $/) {
+		chop $reference; chop $reference;
+		$reference .= ".";	
+	}
+	return $reference
+}
+
 # sub new_journal_citation {}
 # sub new_magazine_citation {}
 # sub new_website_citation {}
