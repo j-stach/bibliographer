@@ -13,7 +13,7 @@ our @EXPORT = qw($name_pattern $author_pattern $year_pattern $date_pattern $page
 $location_pattern $url_pattern $thesis_type_pattern $article_title_pattern $book_title_pattern $journal_name_pattern\
 $publisher_name_pattern $website_name_pattern $institution_name_pattern $journal_citation_pattern $book_citation_pattern\
 $newspaper_citation_pattern $magazine_citation_pattern $website_citation_pattern $conference_citation_pattern $thesis_citation_pattern\
-pull_authors trim_title new_book_citation);
+is_MLA pull_authors trim_title new_book_citation);
 
 our $name_pattern = qr/(?<family>\pL[\pL'\p{Pd}\s]*),\s+(?<first>(\p{Lu}\.\s?)+|(\p{Lu}[\pL'\p{Pd}]*))/;
 our $author_pattern = qr/(?<primary>$name_pattern)(,\sand\s(?<secondary>$name_pattern)|(?<others>\set\sal))?/;
@@ -47,6 +47,18 @@ our $thesis_citation_pattern = qr/(?<authors>$author_pattern)\.\s+(?<title>$arti
 
 
 ## MLA-specific subroutines 
+
+sub is_MLA {
+	my ($line) = @_;
+	if ($line =~ $journal_citation_pattern ||
+	$line =~ $book_citation_pattern ||
+	$line =~ $newspaper_citation_pattern ||
+	$line =~ $magazine_citation_pattern ||
+	$line =~ $website_citation_pattern ||
+	$line =~ $conference_citation_pattern ||
+	$line =~ $thesis_citation_pattern) { return 1 }
+	else { return 0 }
+}
 
 sub pull_authors {
 	my ($authors) = @_;
@@ -99,7 +111,7 @@ sub new_author_list {
 	my $author_list = "";
 	my $author_count = '0';
 	while (($author_count + 1) <= $author_max) {
-		if ($authors[$author_count] =~ $Fmt::author_name_pattern) {
+		if ($authors[$author_count] =~ $Fmt::raw_author_name_pattern) {
 			my $given_name = $+{first};
 			my $family_name = $+{family};
 			my $styled_author;
