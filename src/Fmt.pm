@@ -173,7 +173,7 @@ sub pull_raw_info {
 our $raw_author_name_pattern = qr{Given:\((?<given>.*?)\) Family:\((?<family>.*?)\)};
 sub author_array_from_string {
 	my ($author_string) = @_;
-	my @authors = m/\[$raw_author_name_pattern\]/g;
+	my @authors = $author_string =~ m/\[$raw_author_name_pattern\]/g;
 	return @authors
 }
 

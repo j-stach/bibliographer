@@ -167,12 +167,94 @@ sub new_book_citation {
 	return $reference
 }
 
-# sub new_journal_citation {}
-# sub new_magazine_citation {}
-# sub new_website_citation {}
-# sub new_thesis_citation {}
-# sub new_newspaper_citation {}
-# sub new_conference_citation {}
+sub new_journal_citation {
+	my (@authors, $title, $journal, $date, $pages) = @_;
+	my $reference = "";
+	if (@authors) {
+		my $author_list = new_author_list(@authors);
+		$reference .= $author_list;
+	}
+	if ($title) {
+		$reference .= "$title. ";
+	} else {}
+	if ($journal) {
+		$reference .= "$journal, ";
+	}
+	if ($date) {
+		my $styled_date;
+		if ($date =~ $Fmt::year_pattern) {
+			$styled_date = $date;
+		} elsif ($date =~ $Fmt::date_pattern) {
+			$styled_date = $+{year};
+		} elsif ($date =~ $Fmt::date_range_pattern) {
+			my $start_date = $+{start};
+			if ($start_date =~ $Fmt::date_pattern) {
+				$styled_date = $+{year};
+			}
+		}
+		$reference .= "$styled_date, ";
+	}
+	if ($pages) {
+		$reference .= "pp. $pages."
+	}
+	if ($reference =~ /, $/) {
+		chop $reference; chop $reference;
+		$reference .= ".";	
+	}
+	return $reference
+}
+
+sub new_magazine_citation {
+	my (@authors, $title, $magazine, $issue, $date, $pages) = @_;
+	my $reference = "";
+	if (@authors) {
+		my $author_list = new_author_list(@authors);
+		$reference .= $author_list;
+	}
+	if ($title) {
+		$reference .= "$title. ";
+	} else {}
+	if ($magazine) {
+		$reference .= "$magazine, ";
+	}
+	if ($issue) {
+		$reference .= "$issue, ";
+	}
+	if ($date) {
+		my $styled_date;
+		if ($date =~ $Fmt::year_pattern) {
+			$styled_date = $date;
+		} elsif ($date =~ $Fmt::date_pattern) {
+			$styled_date = $+{year};
+		} elsif ($date =~ $Fmt::date_range_pattern) {
+			my $start_date = $+{start};
+			if ($start_date =~ $Fmt::date_pattern) {
+				$styled_date = $+{year};
+			}
+		}
+		$reference .= "$styled_date, ";
+	}
+	if ($pages) {
+		$reference .= "pp. $pages."
+	}
+	if ($reference =~ /, $/) {
+		chop $reference; chop $reference;
+		$reference .= ".";	
+	}
+	return $reference
+}
+
+sub new_website_citation {
+}
+
+sub new_thesis_citation {
+}
+
+sub new_newspaper_citation {
+}
+
+sub new_conference_citation {
+}
 
 
 
