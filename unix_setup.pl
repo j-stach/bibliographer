@@ -46,12 +46,12 @@ if ($shell_path =~ m{/bin/([^/]+)$}) {
 sub find_shell_config {
 	my ($shell) = @_;
 	my %local_config_files = (
-		'bash' => '$ENV{HOME}/.bashrc',
-		'zsh' => '$ENV{HOME}/.zshrc',
-		'fish' => '$ENV{HOME}/.config/fish/config.fish',
-		'tcsh' => '$ENV{HOME}/.tcshrc',
-		'ksh' => '$ENV{HOME}/.kshrc',
-		'csh' => '$ENV{HOME}/.cshrc',
+		'bash' => "$ENV{HOME}/.bashrc",
+		'zsh' => "$ENV{HOME}/.zshrc",
+		'fish' => "$ENV{HOME}/.config/fish/config.fish",
+		'tcsh' => "$ENV{HOME}/.tcshrc",
+		'ksh' => "$ENV{HOME}/.kshrc",
+		'csh' => "$ENV{HOME}/.cshrc",
 	);
 	my %global_config_files = (
 		'bash' => '/etc/bash.bashrc',
