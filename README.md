@@ -46,10 +46,11 @@ Sorry but you are SOL right now. I will get around to developing a Windows setup
 You are welcome to follow the Windows equivalent of the manual setup steps described above to test Bibliographer on your system. <br>
 
 ## Using Bibliographer
-// To Do:
-// bibliographer \[command\] \<args\> \[option\] \<citation style\>
-// .rtf only
-// must be correctly formatted to parse citation info
+Bibliographer is currently incomplete and in development. As new functionality is added, this section will be updated to reflect the changes. <br>
+// To Do: <br>
+// bibliographer \[command\] \<args\> \[option\] \<citation style\> <br>
+// .rtf only <br>
+// must be correctly formatted to parse citation info <br>
 
 ## Future directions
 When complete, the core functionality of this tool will also include:
