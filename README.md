@@ -4,7 +4,7 @@ Future versions will be able to reformat entire essays, including in-text citati
 ### Work in progress
 **The current version is not functional and should not be used. However, feel free to browse the source code for ideas, and feel free to offer suggestions. New features will not be considered until the core functionality is established.** <br>
 
-### Note: This is a personal portfolio project, not a professional tool. I intend to make it the best it can be, but make no guarantees of its effectiveness or functionality. If you would like to use it you are welcome, but I recommend reading this documentation thoroughly before setting it up on your device. Additionally, consult the --help documentation and test the script on a sample bibliography before attempting to use it on an actual file.
+##### Note: This is a personal portfolio project, not a professional tool. I intend to make it the best it can be, but make no guarantees of its effectiveness or functionality. If you would like to use it you are welcome, but I recommend reading this documentation thoroughly before setting it up on your device. Additionally, consult the --help documentation and test the script on a sample bibliography before attempting to use it on an actual file.
 Any bugs or difficulty you encounter can be reported to this github repository by submitting an issue, but please read the current list of issues before submitting a request. You can also send me an email at surefire93@proton.me to report an issue; please include "Bibliographer" in the subject line and attach the before and after files to the email body if you are able. <br>
 
 ## Requirements
