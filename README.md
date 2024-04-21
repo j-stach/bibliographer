@@ -1,5 +1,5 @@
 # bibliographer (WIP)
-Bibliographer is a command line tool for effortlessly reformatting academic bibliographies from one reference style to another. <br>
+Bibliographer is a command line tool for effortlessly reformatting academic bibliographies from one reference style to another.
 Future versions will be able to reformat entire essays, including in-text citations. <br>
 ### Work in progress
 **The current version is not functional and should not be used. However, feel free to browse the source code for ideas, and feel free to offer suggestions. New features will not be considered until the core functionality is established.** <br>
